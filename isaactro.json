@@ -1,0 +1,13 @@
+{
+	"id": "isaactro",
+	"name": "Isaactro",
+	"author": ["BallpointPen"],
+	"description": "Binding of Isaac-inspired mod that adds several items as jokers",
+	"prefix": "itro",
+	"main_file": "Isaactro.lua",
+	"badge_colour": "c7638f",
+	"version": "1.0.0",
+	"dependencies": [
+		"Steamodded (>=1.0.0~ALPHA-1225a)"
+	]
+}

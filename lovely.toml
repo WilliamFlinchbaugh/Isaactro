@@ -1,0 +1,59 @@
+
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+
+
+#Negative bonus chips UI
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = '''
+bonus_chips = (self.ability.bonus + (self.ability.perma_bonus or 0)) > 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,
+'''
+position = "at"
+payload = '''
+bonus_chips = (self.ability.bonus + (self.ability.perma_bonus or 0)) ~= 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,
+'''
+match_indent = true
+
+
+
+
+
+#Spoon Bender plasma effect
+[[patches]]
+[patches.pattern]
+target = "back.lua"
+pattern = "if self.name == 'Plasma Deck' and args.context == 'final_scoring_step' then"
+position = "at"
+payload = '''
+if (self.name == 'Plasma Deck' or calculate_balance()) and args.context == 'final_scoring_step' then
+'''
+match_indent = true
+overwrite = true
+
+
+
+
+[[patches]]
+[patches.pattern]
+target = "back.lua"
+pattern = '''
+Back = Object:extend()
+'''
+position = "after"
+match_indent = true
+payload = '''
+calculate_balance = function()
+    for _, joker in ipairs(G.jokers.cards) do
+        if joker.config.center.key == "j_itro_spoonbender" then
+            return true
+        end
+    end
+    return false
+end
+'''
