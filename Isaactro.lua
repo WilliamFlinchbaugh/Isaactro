@@ -39,6 +39,7 @@ local function level_of_most_played()
     return G.GAME.hands[hand].level or 1
 end
 
+
 -- QUALITY 0 JOKERS (all common)
 
 -- Missing No.
@@ -1886,7 +1887,123 @@ SMODS.Joker {
     end
 }
 
+-- Cricket's Body (rare)
+SMODS.Joker {
+    -- If first played hand is 1 face card, destroy it and add 4 random number cards to hand
+    key = "cricketsbody",
+    loc_txt = {
+        name = "Cricket's Body",
+        text = {
+            "If {C:attention}first hand{} of",
+            "round is {C:attention}#1# face card{},",
+            "destroy it and add {C:attention}#2#{}",
+            "random {C:attention}numbered cards{}",
+            "to your hand"
+        }
+    },
+    config = { extra = { face_cards = 1, numbered_cards = 4, used = false } },
+    pos = {
+        x = 9,
+        y = 33
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.face_cards, card.ability.extra.numbered_cards }}
+    end,
+    calculate = function(self, card, context)
+        if context.first_hand_drawn and not context.blueprint then
+            card.ability.extra.used = false
+            local eval = function() return not card.ability.extra.used end
+            juice_card_until(card, eval, true)
+        end
 
+        if context.destroying_card and context.destroying_card:get_id() >= 11 and G.GAME.current_round.hands_played == 0 and #context.full_hand == 1 and not context.blueprint then
+            card.ability.extra.used = true
+            card_eval_status_text(context.destroying_card, 'extra', nil, nil, nil, {message = localize('k_eaten_ex')})
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.7,
+                func = function()
+                    for i = 1, card.ability.extra.numbered_cards do
+                        local numbers = {}
+                        for _, v in ipairs(SMODS.Rank.obj_buffer) do
+                            local r = SMODS.Ranks[v]
+                            if v ~= 'Ace' and not r.face then table.insert(numbers, r) end
+                        end
+                        local _suit, _rank =
+                            pseudorandom_element(SMODS.Suits, pseudoseed('cricketsbody')).card_key,
+                            pseudorandom_element(numbers, pseudoseed('cricketsbody')).card_key
+                        create_playing_card({
+                            front = G.P_CARDS[_suit .. '_' .. _rank],
+                            center = nil,
+                        }, G.hand, nil, i ~= 1, { G.C.SECONDARY_SET.Spectral })
+                    end
+                    return true
+                end
+            }))
+
+            return true
+        end
+
+        
+    end
+}
+
+-- Holy Light (uncommon)
+SMODS.Joker {
+    -- 1 in 4 chance for each played card to gain random enhancement when scored
+    key = "holylight",
+    loc_txt = {
+        name = "Holy Light",
+        text = {
+            "{C:green}#1# in #2#{} chance for",
+            "each played card to gain",
+            "a {C:attention}random enhancement{} when scored"
+        }
+    },
+    config = { extra = { odds = 4 } },
+    pos = {
+        x = 9,
+        y = 45
+    },
+    cost = 5,
+    rarity = 2,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds }}
+    end,
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual and not context.blueprint then
+            if pseudorandom('holylight') < 1 / 5 then
+                local cen_pool = {}
+                for k, v in pairs(G.P_CENTER_POOLS["Enhanced"]) do
+                    if v.key ~= 'm_stone' and not v.overrides_base_rank then
+                        cen_pool[#cen_pool + 1] = v
+                    end
+                end
+                local enhancement = pseudorandom_element(cen_pool, pseudoseed('holylight'))
+                context.other_card:set_ability(enhancement, nil, true)
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        context.other_card:juice_up()
+                        return true
+                    end
+                })) 
+                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            end
+        end
+    end
+}
 
 
 -- --- Tester challenges for isaactro jokers
@@ -1912,7 +2029,7 @@ SMODS.Challenge {
     },
     jokers = { 
         {id = "j_blueprint"},
-        {id = "j_itro_mutantspider"}, 
+        {id = "j_itro_holylight"}, 
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
         {id = "j_blue_joker"},
