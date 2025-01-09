@@ -1918,14 +1918,17 @@ SMODS.Joker {
         return {vars = { card.ability.extra.face_cards, card.ability.extra.numbered_cards }}
     end,
     calculate = function(self, card, context)
-        if context.first_hand_drawn and not context.blueprint then
+        if context.first_hand_drawn and not context.blueprint and not card.ability.extra.used then
             card.ability.extra.used = false
             local eval = function() return not card.ability.extra.used end
             juice_card_until(card, eval, true)
         end
 
-        if context.destroying_card and context.destroying_card:get_id() >= 11 and G.GAME.current_round.hands_played == 0 and #context.full_hand == 1 and not context.blueprint then
+        if context.cardarea == G.jokers and G.GAME.current_round.hands_played == 0 and context.before then 
             card.ability.extra.used = true
+        end
+
+        if context.destroying_card and context.destroying_card:get_id() >= 11 and G.GAME.current_round.hands_played == 0 and #context.full_hand == 1 and not context.blueprint then
             card_eval_status_text(context.destroying_card, 'extra', nil, nil, nil, {message = localize('k_eaten_ex')})
             G.E_MANAGER:add_event(Event({
                 trigger = 'after',
@@ -1951,8 +1954,6 @@ SMODS.Joker {
 
             return true
         end
-
-        
     end
 }
 
@@ -1993,10 +1994,11 @@ SMODS.Joker {
                     end
                 end
                 local enhancement = pseudorandom_element(cen_pool, pseudoseed('holylight'))
-                context.other_card:set_ability(enhancement, nil, true)
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        context.other_card:juice_up()
+                        card:juice_up(0.3, 0.4)
+                        context.other_card:set_ability(enhancement, nil, true)
+                        context.other_card:juice_up(0.3, 0.4)
                         return true
                     end
                 })) 
@@ -2309,6 +2311,67 @@ SMODS.Joker {
     end
 }
 
+-- Brimstone (rare)
+SMODS.Joker {
+    -- If played hand contains Five of a Kind, the first scoring card without an edition becomes Polychrome
+    key = "brimstone",
+    loc_txt = {
+        name = "Brimstone",
+        text = {
+            "If {C:attention}first hand{} of round",
+            "contains {C:attention}Five of a Kind{},",
+            "the {C:attention}first scoring{} card without",
+            "an edition becomes {C:attention}Polychrome{}"
+        }
+    },
+    config = { extra = { used = false } },
+    pos = {
+        x = 5,
+        y = 25
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue+1] = G.P_CENTERS.e_polychrome
+        return {vars = {}}
+    end,
+    calculate = function(self, card, context)
+        if context.first_hand_drawn and not context.blueprint then
+            card.ability.extra.used = false
+            local eval = function() return not card.ability.extra.used end
+            juice_card_until(card, eval, true)
+        end
+
+        if context.cardarea == G.jokers and G.GAME.current_round.hands_played == 0 and context.before then 
+            card.ability.extra.used = true
+        end
+
+        -- and #context.poker_hands["Five of a Kind"] == 5
+        if context.cardarea == G.jokers and context.before and G.GAME.current_round.hands_played == 0 and context.poker_hands["Five of a Kind"][1] and not context.blueprint then
+            -- find first scoring card without an edition
+            for _, playing_card in ipairs(context.scoring_hand) do
+                if not playing_card.edition then
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            card:juice_up(0.3, 0.4)
+                            playing_card:set_edition("e_polychrome")
+                            playing_card:juice_up(0.3, 0.4)
+                            return true
+                        end
+                    })) 
+                    card_eval_status_text(playing_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+                    return
+                end
+            end
+        end
+    end
+}
+
 
 -- --- Tester challenges for isaactro jokers
 SMODS.Challenge {
@@ -2329,10 +2392,12 @@ SMODS.Challenge {
         {id = "v_paint_brush"},
         {id = "v_palette"},
         {id = "v_reroll_surplus"},
-        {id = "v_reroll_glut"}
+        {id = "v_reroll_glut"},
+        {id = "v_tarot_merchant"},
+        {id = "v_tarot_tycoon"},
     },
     jokers = { 
-        {id = "j_itro_d6"}, 
+        {id = "j_itro_brimstone"}, 
         {id = "j_blueprint"},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
