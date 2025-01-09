@@ -1196,7 +1196,7 @@ SMODS.Joker {
         name = 'Number One',
         text = {
             "{C:blue}+#1#{} hands when {C:attention}Blind{} is selected",
-            "{C:red}#2#{} Hand Size"
+            "{C:attention}#2#{} hand size"
         }
     },
     config = { extra = { hands = 2, hand_size = -2 } },
@@ -2071,6 +2071,107 @@ SMODS.Joker {
     end
 }
 
+-- The Mind (rare)
+SMODS.Joker {
+    -- +2 hand size
+    key = "themind",
+    loc_txt = {
+        name = 'The Mind',
+        text = {
+            "{C:attention}+#1#{} hand size"
+        }
+    },
+    config = { extra = { hand_size = 2 } },
+    pos = {
+        x = 5,
+        y = 42
+    },
+    cost = 6,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.hand_size }}
+    end,
+    add_to_deck = function(self, card, from_debuff)
+        G.hand:change_size(card.ability.extra.hand_size)
+    end,
+    remove_from_deck = function(self, card, from_debuff)
+        G.hand:change_size(-card.ability.extra.hand_size)
+    end
+}
+
+-- The Body (rare)
+SMODS.Joker {
+    -- +2 discards
+    key = "thebody",
+    loc_txt = {
+        name = 'The Body',
+        text = {
+            "{C:red}+#1#{} discards"
+        }
+    },
+    config = { extra = { discards = 2 } },
+    pos = {
+        x = 6,
+        y = 42
+    },
+    cost = 6,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.discards }}
+    end,
+    add_to_deck = function(self, card, from_debuff)
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards + card.ability.extra.discards
+    end,
+    remove_from_deck = function(self, card, from_debuff)
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards - card.ability.extra.discards
+    end
+}
+
+-- The Soul (rare)
+SMODS.Joker {
+    -- +2 hands
+    key = "thesoul",
+    loc_txt = {
+        name = 'The Soul',
+        text = {
+            "{C:blue}+#1#{} hands"
+        }
+    },
+    config = { extra = { hands = 2 } },
+    pos = {
+        x = 7,
+        y = 42
+    },
+    cost = 6,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.hands }}
+    end,
+    add_to_deck = function(self, card, from_debuff)
+        G.GAME.round_resets.hands = G.GAME.round_resets.hands + card.ability.extra.hands
+    end,
+    remove_from_deck = function(self, card, from_debuff)
+        G.GAME.round_resets.hands = G.GAME.round_resets.hands - card.ability.extra.hands
+    end
+}
+
+
+
 -- --- Tester challenges for isaactro jokers
 SMODS.Challenge {
     loc_txt = "Isaactro Tester",
@@ -2093,13 +2194,15 @@ SMODS.Challenge {
         {id = "v_reroll_glut"}
     },
     jokers = { 
+        {id = "j_itro_themind"}, 
+        {id = "j_itro_thebody"}, 
+        {id = "j_itro_thesoul"}, 
         {id = "j_blueprint"},
-        {id = "j_itro_deadeye"}, 
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
-        {id = "j_blue_joker"},
-        {id = "j_oops"},
-        {id = "j_hanging_chad"},
+        -- {id = "j_blue_joker"},
+        -- {id = "j_oops"},
+        -- {id = "j_hanging_chad"},
     },
     unlocked = true
 }
