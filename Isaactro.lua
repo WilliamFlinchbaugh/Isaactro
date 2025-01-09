@@ -156,8 +156,8 @@ SMODS.Joker {
         name = 'Box',
         text = {
             "After {C:attention}#1#{} rounds, sell this card",
-            "to gain {C:attention}1 random Planet Card",
-            "and {C:attention}1 random Tarot Card",
+            "to gain {C:attention}1{} random {C:attention}Planet Card{}",
+            "and {C:attention}1{} random {C:attention}Tarot Card{}",
             "{C:inactive}(Currently {C:attention}#2#{C:inactive}/#1#)"
         }
     },
@@ -985,7 +985,7 @@ SMODS.Joker {
             "{C:inactive}(Copies are created from left to right)"
         }
     },
-    config = { extra = { rounds_needed = 2, odds = 2, rounds = 0 } },
+    config = { extra = { rounds_needed = 2, odds = 1, rounds = 0 } },
     pos = {
         x = 0,
         y = 10
@@ -1021,7 +1021,7 @@ SMODS.Joker {
                 card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_nope_ex')})
                 if #G.jokers.cards > 1 then
                     for _, other_joker in ipairs(G.jokers.cards) do
-                        if other_joker ~= card then
+                        if other_joker ~= card and not other_joker.ability.eternal then
                             G.E_MANAGER:add_event(Event({
                                 func = function()
                                 play_sound('tarot1')
@@ -1042,16 +1042,6 @@ SMODS.Joker {
                                 return true
                                 end
                             }))
-                            -- G.E_MANAGER:add_event(Event({
-                            --     trigger = 'after',
-                            --     delay = 0.5,
-                            --     func = (function()
-                            --         G.jokers:remove_card(other_joker)
-                            --         other_joker:remove()
-                            --         play_sound('cancel', 0.7 + math.random()*0.1, 0.7)
-                            --         return true
-                            --     end)
-                            -- }))
                         end
                     end
                 end
@@ -1135,7 +1125,7 @@ SMODS.Joker {
             local jokers = {}
             local num_destroyed = 0
             for _, other_joker in ipairs(G.jokers.cards) do
-                if other_joker ~= card and num_destroyed < card.ability.extra.num_jokers then
+                if other_joker ~= card and not other_joker.ability.eternal and num_destroyed < card.ability.extra.num_jokers then
                     jokers[#jokers+1] = other_joker
                     num_destroyed = num_destroyed + 1
                 end
@@ -1452,6 +1442,7 @@ SMODS.Joker {
 }
 
 -- Jesus Juice (common)
+-- TODO: More interesting effect?
 SMODS.Joker {
     -- Each played diamond or heart gives +2 mult and +5 chips
     key = "jesusjuice",
@@ -1463,7 +1454,7 @@ SMODS.Joker {
             "{C:mult}+#1#{} Mult when scored"
         }
     },
-    config = { extra = { mult = 3, chips = 5 } },
+    config = { extra = { mult = 2, chips = 3 } },
     pos = {
         x = 2,
         y = 31
@@ -2422,7 +2413,7 @@ SMODS.Joker {
     end
 }
 
--- --- Tester challenges for isaactro jokers
+-- Tester challenge to test jokers
 SMODS.Challenge {
     loc_txt = "Isaactro Tester",
     key = "isaactro_tester",
@@ -2446,9 +2437,10 @@ SMODS.Challenge {
         {id = "v_tarot_tycoon"},
     },
     jokers = { 
-        {id = "j_itro_brimstone"}, 
+        {id = "j_itro_brimstone", eternal = true}, 
         {id = "j_itro_magicmushroom"}, 
-        {id = "j_blueprint"},
+        {id = "j_itro_crookedpenny"}, 
+        {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
         -- {id = "j_blue_joker"},
