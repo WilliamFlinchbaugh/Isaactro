@@ -2372,6 +2372,55 @@ SMODS.Joker {
     end
 }
 
+-- Magic Mushroom (rare)
+SMODS.Joker {
+    -- X2 mult
+	-- +50 chips
+	-- +1 hand size
+    key = "magicmushroom",
+    loc_txt = {
+        name = "Magic Mushroom",
+        text = {
+            "{X:mult,C:white}X#1#{} Mult",
+            "{C:chips}+#2#{} Chips",
+            "{C:attention}+#3#{} hand size"
+        }
+    },
+    config = { extra = { Xmult = 2, chips = 50, hand_size = 1 } },
+    pos = {
+        x = 2,
+        y = 18
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.Xmult, card.ability.extra.chips, card.ability.extra.hand_size }}
+    end,
+
+    add_to_deck = function(self, card, from_debuff)
+        G.hand:change_size(card.ability.extra.hand_size)
+    end,
+
+    remove_from_deck = function(self, card, from_debuff)
+        G.hand:change_size(-card.ability.extra.hand_size)
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            return {
+                chips = card.ability.extra.chips,
+                Xmult_mod = card.ability.extra.Xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
+            }
+        end
+    end
+}
 
 -- --- Tester challenges for isaactro jokers
 SMODS.Challenge {
@@ -2398,6 +2447,7 @@ SMODS.Challenge {
     },
     jokers = { 
         {id = "j_itro_brimstone"}, 
+        {id = "j_itro_magicmushroom"}, 
         {id = "j_blueprint"},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
