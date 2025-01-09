@@ -1653,7 +1653,7 @@ SMODS.Joker {
                 local eval = function(card) return not card.REMOVED end
                 juice_card_until(card, eval, true)
                 return {
-                    message = localize('k_active_ex'),
+                    message = localize('k_active'),
                     colour = G.C.FILTER
                 }
             end
@@ -2259,6 +2259,55 @@ SMODS.Joker {
     end
 }
 
+-- Qualtiy 4 Jokers (all rare)
+
+-- The D6 (rare)
+SMODS.Joker {
+    -- Reroll prices don't increase
+    key = "d6",
+    loc_txt = {
+        name = 'The D6',
+        text = {
+            "{C:attention}Reroll prices{} don't increase",
+            "{C:inactive}(Minimum of {C:money}$1{C:inactive})"
+        }
+    },
+    config = { extra = { init_reroll_price = 1 } },
+    pos = {
+        x = 1,
+        y = 6
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return { vars = { init_reroll_price = 0 } }
+    end,
+
+    calculate = function(self, card, context)
+        -- if entering shop, record the inital shop price
+        if context.end_of_round and not context.game_over and not context.blueprint and not context.repetition and not context.individual then
+            card.ability.extra.init_reroll_price = math.max(G.GAME.current_round.reroll_cost, 1)
+        end
+
+        -- if rerolling
+        if context.reroll_shop and not context.blueprint then
+            G.E_MANAGER:add_event(Event({
+                trigger = 'immediate',
+                func = function()
+                    G.GAME.current_round.reroll_cost = card.ability.extra.init_reroll_price
+                    return true
+                end
+            }))
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_reset')})
+        end
+    end
+}
 
 
 -- --- Tester challenges for isaactro jokers
@@ -2283,7 +2332,7 @@ SMODS.Challenge {
         {id = "v_reroll_glut"}
     },
     jokers = { 
-        {id = "j_itro_keeperssack"}, 
+        {id = "j_itro_d6"}, 
         {id = "j_blueprint"},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
