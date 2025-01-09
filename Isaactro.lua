@@ -2170,6 +2170,44 @@ SMODS.Joker {
     end
 }
 
+-- Jacob's Ladder (uncommon)
+SMODS.Joker {
+    -- Each played Jack gives +20 Mult when scored
+    key = "jacobsladder",
+    loc_txt = {
+        name = "Jacob's Ladder",
+        text = {
+            "Each played {C:attention}Jack{}",
+            "gives {C:mult}+#1#{} Mult when scored"
+        }
+    },
+    config = { extra = { mult = 20 } },
+    pos = {
+        x = 9,
+        y = 54
+    },
+    cost = 5,
+    rarity = 2,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.mult }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.individual and context.cardarea == G.play and context.other_card:get_id() == 11 then
+            return {
+                mult = card.ability.extra.mult,
+                card = card
+            }
+        end
+    end
+}
+
 
 
 -- --- Tester challenges for isaactro jokers
@@ -2194,9 +2232,7 @@ SMODS.Challenge {
         {id = "v_reroll_glut"}
     },
     jokers = { 
-        {id = "j_itro_themind"}, 
-        {id = "j_itro_thebody"}, 
-        {id = "j_itro_thesoul"}, 
+        {id = "j_itro_jacobsladder"}, 
         {id = "j_blueprint"},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
