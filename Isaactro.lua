@@ -266,8 +266,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Dead Bird',
         text = {
-            "Each scored card on {C:attention}Last Hand Played{}",
-            "gives {C:mult}+#1# Mult"
+            "Each scored card on",
+            "{C:attention}last hand{} of round",
+            "gives {C:mult}+#1#{} Mult"
         }
     },
     config = { extra = { mult = 2 } },
@@ -2208,6 +2209,56 @@ SMODS.Joker {
     end
 }
 
+-- Keeper's Sack (uncommon)
+SMODS.Joker {
+    -- This joker gains Mult equal to dollars spent in shop (excluding rerolls)
+    key = "keeperssack",
+    loc_txt = {
+        name = "Keeper's Sack",
+        text = {
+            "This {C:attention}Joker{} gains",
+            "{C:mult}+#1#{} Mult for every",
+            "{C:money}$#2#{} you spend in Shop",
+            "{C:inactive}(Excluding rerolls)",
+            "{C:inactive}(Currently {C:money}$#3#{C:inactive} = {C:mult}+#4#{C:inactive})"
+        }
+    },
+    pos = {
+        x = 9,
+        y = 70
+    },
+    config = { extra = { mult_mod = 2, spending_increment = 6, money_spent = 0, mult = 0 } },
+    cost = 6,
+    rarity = 2,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.mult_mod, card.ability.extra.spending_increment, card.ability.extra.money_spent, card.ability.extra.mult }}
+    end,
+
+    calculate = function(self, card, context)
+        if (context.buying_card or context.open_booster) and not context.blueprint then
+            card.ability.extra.money_spent = card.ability.extra.money_spent + context.card.cost
+            local increments = math.floor(card.ability.extra.money_spent / card.ability.extra.spending_increment)
+            local new_mult = increments * card.ability.extra.mult_mod
+            if new_mult > card.ability.extra.mult then
+                card.ability.extra.mult = new_mult
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            end
+        end
+
+        if context.joker_main and card.ability.extra.mult > 0 then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+    end
+}
+
 
 
 -- --- Tester challenges for isaactro jokers
@@ -2232,7 +2283,7 @@ SMODS.Challenge {
         {id = "v_reroll_glut"}
     },
     jokers = { 
-        {id = "j_itro_jacobsladder"}, 
+        {id = "j_itro_keeperssack"}, 
         {id = "j_blueprint"},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
