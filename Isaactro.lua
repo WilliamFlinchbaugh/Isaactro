@@ -2005,6 +2005,71 @@ SMODS.Joker {
     end
 }
 
+-- Dead Eye (uncommon)
+SMODS.Joker {
+    -- This Joker gains x0.1 mult for each consecutive same poker hand played
+    key = "deadeye",
+    loc_txt = {
+        name = 'Dead Eye',
+        text = {
+            "This {C:attention}Joker{} gains",
+            "{X:mult,C:white}X#1#{} Mult for",
+            "each consecutive {C:attention}same{}",
+            "{C:attention}poker hand{} played",
+            "{C:inactive}(Last played {C:attention}#2#{C:inactive})",
+            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive})"
+        }
+    },
+    config = { extra = { Xmult_mod = 0.1, Xmult = 1, Xmult_init = 1, last_played = "None" } },
+    pos = {
+        x = 8,
+        y = 45
+    },
+    cost = 6,
+    rarity = 2,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+
+        return { vars = { card.ability.extra.Xmult_mod, card.ability.extra.last_played, card.ability.extra.Xmult }}
+    end,
+
+    calculate = function(self, card, context)
+        -- apply xmult
+        if context.joker_main and card.ability.extra.Xmult > 1 then
+            return {
+                Xmult_mod = card.ability.extra.Xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
+            }
+        end
+
+        -- before, check if the hand is last played hand
+        if context.cardarea == G.jokers and context.before and context.scoring_name and not context.blueprint then
+            -- if first time, set last played hand to current hand and upgrade
+            if card.ability.extra.last_played == "None" then
+                card.ability.extra.last_played = context.scoring_name
+                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            
+
+            -- if consecutive, upgrade
+            elseif context.scoring_name == card.ability.extra.last_played then
+                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            
+            -- if not consecutive, reset
+            else
+                card.ability.extra.Xmult = card.ability.extra.Xmult_init
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_reset')})
+                card.ability.extra.last_played = context.scoring_name
+            end
+        end
+    end
+}
 
 -- --- Tester challenges for isaactro jokers
 SMODS.Challenge {
@@ -2029,7 +2094,7 @@ SMODS.Challenge {
     },
     jokers = { 
         {id = "j_blueprint"},
-        {id = "j_itro_holylight"}, 
+        {id = "j_itro_deadeye"}, 
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
         {id = "j_blue_joker"},
