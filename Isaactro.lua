@@ -1442,7 +1442,7 @@ SMODS.Joker {
 }
 
 -- Jesus Juice (common)
--- TODO: More interesting effect?
+-- TODO: More interesting effect needed
 SMODS.Joker {
     -- Each played diamond or heart gives +2 mult and +5 chips
     key = "jesusjuice",
@@ -1692,7 +1692,7 @@ SMODS.Joker {
         text = {
             "{X:mult,C:white}X#1#{} Mult",
             "Played cards {C:attention}permanently{}",
-            "{C:attention}lose {C:chips}#2#{} Chips when scored"
+            "{C:red}lose {C:chips}#2#{} Chips when scored"
         }
     },
     config = { extra = { Xmult = 3, suck = 8, min_bonus = 0 } },
@@ -2466,6 +2466,78 @@ SMODS.Joker {
     end
 }
 
+-- Sacred Orb (rare)
+SMODS.Joker {
+    -- All common jokers in shop are rerolled once
+    key = "sacredorb",
+    loc_txt = {
+        name = 'Sacred Orb',
+        text = {
+            "After shop is {C:attention}rerolled{}, all",
+            "{C:blue}Common Jokers{} in shop have",
+            "a {C:green}#1# in #2#{} chance to",
+            "be {C:attention}rerolled{} into a random",
+            "{C:green}Uncommon Joker{}"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 69
+    },
+    config = { extra = { odds = 3 } },
+    cost = 6,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds }}
+    end,
+    calculate = function(self, card, context)
+        -- if rerolling
+        if context.reroll_shop and not context.blueprint then
+            -- search for common jokers in shop
+            local common_jokers = {}
+            for _, v in ipairs(G.shop_jokers.cards) do
+                if v.config.center.rarity == 1 then
+                    table.insert(common_jokers, v)
+                end
+            end
+
+            -- reroll the common jokers
+            for _, j in ipairs(common_jokers) do
+                -- check if reroll or not
+                if pseudorandom('sacredorb') < 1 / card.ability.extra.odds then
+                    -- remove the common joker
+                    j:juice_up(0.3, 0.4)
+                    local c = G.shop_jokers:remove_card(j)
+                    c:remove()
+                    c = nil
+
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'after',
+                        delay = 0.5,
+                        blockable = false,
+                        blocking = true,
+                        func = function()
+                            -- add an uncommon joker
+                            local joker = create_card("Joker", G.shop_jokers, nil, 0.9, nil, nil, nil, "sacredorb")
+                            create_shop_card_ui(joker)
+                            joker:set_cost()
+                            G.shop_jokers:emplace(joker)
+                            play_sound('holo1', 1.2 + math.random()*0.1, 0.4)
+                            return true
+                        end
+                    }))
+                    card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+                end
+            end
+        end
+    end
+}
+
 -- Tester challenge to test jokers
 SMODS.Challenge {
     loc_txt = "Isaactro Tester",
@@ -2490,7 +2562,7 @@ SMODS.Challenge {
         {id = "v_tarot_tycoon"},
     },
     jokers = { 
-        {id = "j_itro_polyphemus"}, 
+        {id = "j_itro_sacredorb"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
