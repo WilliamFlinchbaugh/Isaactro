@@ -17,7 +17,6 @@ SMODS.current_mod.config_tab = function() --Config tab
 end
 
 -- Helper functions
--- help from Accretion Disk Joker in ExtraCredit Mod: https://github.com/GuilloryCraft/ExtraCredit/blob/main/src/essay.lua
 local function level_of_most_played()
     local _hand, _tally = nil, 0
     for k, v in ipairs(G.handlist) do
@@ -80,8 +79,6 @@ local function consumable_slots_full()
         return 0
     end
 end
-
-
 
 
 -- QUALITY 0 JOKERS (all common)
@@ -201,7 +198,7 @@ SMODS.Joker {
         text = {
             "After {C:attention}#1#{} rounds, sell this card",
             "to gain {C:attention}1{} random",
-            "{C:blue}Planet{} and {C:purple}Tarot{} card",
+            "{C:planet}Planet{} and {C:tarot}Tarot{} card",
             "{C:inactive}(Currently {C:attention}#2#{C:inactive}/#1#)"
         }
     },
@@ -387,9 +384,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Little Baggy',
         text = {
-            "When {C:purple}Tarot{} card is purchased,",
+            "When {C:tarot}Tarot{} card is purchased,",
             "destroy it and gain a random",
-            "{C:blue}Planet{} card"
+            "{C:planet}Planet{} card"
         }
     },
     pos = {
@@ -769,7 +766,7 @@ SMODS.Joker {
         name = 'Epiphora',
         text = {
             "This joker gains {C:chips}+#1#{} Chips",
-            "for each {C:attention}consecutive{} round",
+            "per {C:attention}consecutive{} round",
             "won playing only {C:attention}one hand{}",
             "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips){}"
         }
@@ -828,7 +825,7 @@ SMODS.Joker {
         name = 'Booster Pack',
         text = {
             "After {C:attention}#1#{} rounds, sell this card",
-            "to gain {C:attention}#2#{} Negative {C:purple}Tarot{} cards",
+            "to gain {C:attention}#2#{} Negative {C:tarot}Tarot{} cards",
             "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
         }
     },
@@ -970,7 +967,7 @@ SMODS.Joker {
         name = "Guppy's Head",
         text = {
             "This Joker gains {C:chips}+#1#{} Chips",
-            "for each {C:attention}round played{}",
+            "per {C:attention}round played{}",
             "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips){}"
         }
     },
@@ -1538,7 +1535,7 @@ SMODS.Joker {
         text = {
             "When {C:attention}Planet Card{} is purchased,",
             "destroy it and gain a random",
-            "{C:purple}Tarot{} Card",
+            "{C:tarot}Tarot{} Card",
             "{C:attention}+#1#{} Consumable Slots"
         }
     },
@@ -1999,8 +1996,8 @@ SMODS.Joker {
     loc_txt = {
         name = "Holy Light",
         text = {
-            "{C:green}#1# in #2#{} chance for",
-            "each played card to gain",
+            "{C:green}#1# in #2#{} chance",
+            "per played card to gain",
             "a {C:attention}random enhancement{} when scored"
         }
     },
@@ -2051,8 +2048,8 @@ SMODS.Joker {
         name = 'Dead Eye',
         text = {
             "This {C:attention}Joker{} gains",
-            "{X:mult,C:white}X#1#{} Mult for",
-            "each consecutive {C:attention}same{}",
+            "{X:mult,C:white}X#1#{} Mult per",
+            "consecutive {C:attention}same{}",
             "{C:attention}poker hand{} played",
             "{C:inactive}(Last played {C:attention}#2#{C:inactive})",
             "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
@@ -2215,11 +2212,11 @@ SMODS.Joker {
     loc_txt = {
         name = "Jacob's Ladder",
         text = {
-            "Each played {C:attention}Jack{}",
-            "gives {C:mult}+#1#{} Mult when scored"
+            "Each {C:attention}Jack{} gives",
+            "{C:mult}+#1#{} Mult when scored"
         }
     },
-    config = { extra = { mult = 20 } },
+    config = { extra = { mult = 24 } },
     pos = {
         x = 9,
         y = 54
@@ -2295,6 +2292,684 @@ SMODS.Joker {
         end
     end
 }
+
+-- Birthright Jokers (rare)
+local back2flag = {
+    ["Default"] = "birthright_default_deck",
+    ["Red Deck"] = "birthright_red_deck",
+    ["Blue Deck"] = "birthright_blue_deck",
+    ["Yellow Deck"] = "birthright_yellow_deck",
+    ["Green Deck"] = "birthright_green_deck",
+    ["Black Deck"] = "birthright_black_deck",
+    ["Magic Deck"] = "birthright_magic_deck",
+    ["Nebula Deck"] = "birthright_nebula_deck",
+    ["Ghost Deck"] = "birthright_ghost_deck",
+    ["Abandoned Deck"] = "birthright_abandoned_deck",
+    ["Checkered Deck"] = "birthright_checkered_deck",
+    ["Zodiac Deck"] = "birthright_zodiac_deck",
+    ["Painted Deck"] = "birthright_painted_deck",
+    ["Anaglyph Deck"] = "birthright_anaglyph_deck",
+    ["Plasma Deck"] = "birthright_plasma_deck",
+    ["Erratic Deck"] = "birthright_erratic_deck"
+}
+-- default deck
+SMODS.Joker {
+    -- 1 in 2 chance to create a random Joker when Blind is selected
+    yes_pool_flag = "birthright_default_deck",
+    key = "birthright_default",
+    loc_txt = {
+        name = "Birthright (Default Deck)",
+        text = {
+            "{C:green}#1# in #2#{} chance to",
+            "create a {C:attention}random Joker{}",
+            "when {C:attention}Blind{} is selected",
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { odds = 2 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds }}
+    end,
+    calculate = function(self, card, context)
+        if context.setting_blind then
+            if pseudorandom('birthright') < 1 / card.ability.extra.odds and #G.jokers.cards < G.jokers.config.card_limit then
+                card:juice_up(0.3, 0.4)
+                local joker = create_card('Joker', G.joker, nil, nil, nil, nil, nil, 'birthright')
+                joker:add_to_deck()
+                G.jokers:emplace(joker)
+                play_sound('holo1')
+            end
+        end
+    end
+}
+-- red deck
+SMODS.Joker {
+    -- +8 chips for each discard containing 5 cards since red deck gives +1 discard
+    yes_pool_flag = "birthright_red_deck",
+    key = "birthright_red",
+    loc_txt = {
+        name = "Birthright (Red Deck)",
+        text = {
+            "This Joker gains {C:chips}+#1#{} Chips",
+            "per {C:red}Discard{} containing",
+            "{C:attention}#2#{} cards",
+            "{C:inactive}(Currently {C:chips}+#3#{C:inactive} Chips)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { chip_mod = 8, cards = 5, chips = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.chip_mod, card.ability.extra.cards, card.ability.extra.chips }}
+    end,
+    calculate = function(self, card, context)
+        if context.pre_discard and #context.full_hand == card.ability.extra.cards and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips + card.ability.extra.chip_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+        end
+        if context.joker_main and card.ability.extra.chips > 0 then
+            return {
+                chips = card.ability.extra.chips
+            }
+        end
+    end
+}
+-- blue deck
+SMODS.Joker {
+    -- +6 mult for each hand containing 5 scoring cards played since blue deck gives +1 hand
+    yes_pool_flag = "birthright_blue_deck",
+    key = "birthright_blue",
+    loc_txt = {
+        name = "Birthright (Blue Deck)",
+        text = {
+            "This Joker gains {C:mult}+#1#{} Mult",
+            "per hand played",
+            "containing {C:attention}#2# scoring cards{}",
+            "{C:inactive}(Currently {C:mult}+#3#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { mult_mod = 6, cards = 5, mult = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.mult_mod, card.ability.extra.cards, card.ability.extra.mult }}
+    end,
+    calculate = function(self, card, context)
+        if context.before and context.cardarea == G.jokers and not context.blueprint then
+            if #context.scoring_hand == card.ability.extra.cards then
+                card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            end
+        end
+        if context.joker_main and card.ability.extra.mult > 0 then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+    end
+}
+-- yellow deck
+SMODS.Joker {
+    -- since yellow deck starts with $10, this joker gains +1 mult for each $2 held when the boss blind is defeated
+    yes_pool_flag = "birthright_yellow_deck",
+    key = "birthright_yellow",
+    loc_txt = {
+        name = "Birthright (Yellow Deck)",
+        text = {
+            "This Joker gains {C:mult}+#1#{} Mult",
+            "per {C:money}$#2#{} held when the",
+            "{C:attention}Boss Blind{} is defeated",
+            "{C:inactive}(Currently {C:mult}+#3#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { mult_mod = 1, increment = 2, mult = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.mult_mod, card.ability.extra.increment, card.ability.extra.mult }}
+    end,
+    calculate = function(self, card, context)
+        if context.end_of_round and not context.repetition and not context.individual and G.GAME.blind.boss and not context.blueprint then
+            card.ability.extra.mult = card.ability.extra.mult + math.floor(G.GAME.dollars / card.ability.extra.increment) * card.ability.extra.mult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+        end
+        if context.joker_main and card.ability.extra.mult > 0 then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+    end
+}
+-- green deck
+SMODS.Joker {
+    -- since green deck gives no interest but gives 2$ for hands and 1$ for discards, this joker gives 1$ for each 7$ held when the blind is defeated (caps at 10$)
+    yes_pool_flag = "birthright_green_deck",
+    key = "birthright_green",
+    loc_txt = {
+        name = "Birthright (Green Deck)",
+        text = {
+            "Gain {C:money}$#1#{} in interest",
+            "per {C:money}$#2#{} held at end of round",
+            "{C:inactive}(Caps at {C:money}$#3#{C:inactive})",
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { money = 1, held_increment = 7, cap = 10 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.money, card.ability.extra.held_increment, card.ability.extra.cap }}
+    end,
+    calc_dollar_bonus = function(self, card)
+        local interest = math.floor(G.GAME.dollars / card.ability.extra.held_increment) * card.ability.extra.money
+        return math.min(interest, card.ability.extra.cap)
+    end
+}
+-- black deck
+SMODS.Joker {
+    -- since black deck has 6 joker slots, X1 for each joker held over 5
+    yes_pool_flag = "birthright_black_deck",
+    key = "birthright_black",
+    loc_txt = {
+        name = "Birthright (Black Deck)",
+        text = {
+            "{X:mult,C:white}X#1#{} Mult per",
+            "{C:attention}Joker held{} over {C:attention}#2#{}",
+            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { xmult_mod = 1, jokers_over = 5 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = { 
+                card.ability.extra.xmult_mod, 
+                card.ability.extra.jokers_over, 
+                math.max(1, 1 + (num_jokers()-card.ability.extra.jokers_over)*card.ability.extra.xmult_mod)  
+            }
+        }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main and num_jokers() > card.ability.extra.jokers_over then
+            return {
+                Xmult_mod = math.max(1, 1 + (num_jokers()-card.ability.extra.jokers_over)*card.ability.extra.xmult_mod),
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult_mod} }
+            }
+        end
+    end
+}
+-- magic deck
+SMODS.Joker {
+    -- since magic deck give +1 consumable slot, give X1 mult for each consumable held while all consumable slots are filled
+    yes_pool_flag = "birthright_magic_deck",
+    key = "birthright_magic",
+    loc_txt = {
+        name = "Birthright (Magic Deck)",
+        text = {
+            "{X:mult,C:white}X#1#{} Mult per",
+            "{C:attention}Consumable held{} while",
+            "all {C:attention}Consumable slots{} are filled",
+            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { xmult_mod = 1 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = { 
+                card.ability.extra.xmult_mod, 
+                math.max(1, 1 + consumable_slots_full() * num_consumables() * card.ability.extra.xmult_mod)
+            }
+        }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main and consumable_slots_full() and num_consumables() > 0 then
+            return {
+                Xmult_mod = math.max(1, 1 + consumable_slots_full() * num_consumables() * card.ability.extra.xmult_mod),
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult_mod} }
+            }
+        end
+    end
+}
+-- nebula deck
+SMODS.Joker {
+    -- since nebula deck gives telescope, gain 0.2x Mult every time planet card for most played hand is redeemed
+    yes_pool_flag = "birthright_nebula_deck",
+    key = "birthright_nebula",
+    loc_txt = {
+        name = "Birthright (Nebula Deck)",
+        text = {
+            "This Joker gains {X:mult,C:white}X#1#{} Mult",
+            "when {C:planet}Planet{} card for",
+            "{C:attention}most played hand{} is used",
+            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { xmult_mod = 0.2, xmult = 1 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = { 
+                card.ability.extra.xmult_mod, 
+                card.ability.extra.xmult
+            }
+        }
+    end,
+    calculate = function(self, card, context)
+        if context.using_consumeable and context.consumeable.ability.set == "Planet" and context.consumeable.config.center.key == planet_of_most_played() and not context.blueprint then
+            card.ability.extra.xmult = card.ability.extra.xmult + card.ability.extra.xmult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+        end
+
+        if context.joker_main and card.ability.extra.xmult > 1 then
+            return {
+                Xmult_mod = card.ability.extra.xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+            }
+        end
+    end
+}
+-- ghost deck
+SMODS.Joker {
+    -- since ghost deck puts spectral cards in shop, when spectral card is used, gain 0.2x Mult
+    yes_pool_flag = "birthright_ghost_deck",
+    key = "birthright_ghost",
+    loc_txt = {
+        name = "Birthright (Ghost Deck)",
+        text = {
+            "This Joker gains {X:mult,C:white}X#1#{} Mult ",
+            "when {C:spectral}Spectral{} card is used",
+            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { xmult_mod = 0.2, xmult = 1 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {
+            vars = { 
+                card.ability.extra.xmult_mod, 
+                card.ability.extra.xmult
+            }
+        }
+    end,
+    calculate = function(self, card, context)
+        if context.using_consumeable and context.consumeable.ability.set == "Spectral" and not context.blueprint then
+            card.ability.extra.xmult = card.ability.extra.xmult + card.ability.extra.xmult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+        end
+
+        if context.joker_main and card.ability.extra.xmult > 1 then
+            return {
+                Xmult_mod = card.ability.extra.xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+            }
+        end
+    end
+}
+-- abandoned deck
+SMODS.Joker {
+    -- since abandoned deck has no face cards, gain 0.05x mult for each consecutive hand with no face cards
+    yes_pool_flag = "birthright_abandoned_deck",
+    key = "birthright_abandoned",
+    loc_txt = {
+        name = "Birthright (Abandoned Deck)",
+        text = {
+            "This Joker gains {X:mult,C:white}X#1#{} Mult",
+            "per consecutive hand played",
+            "with no {C:attention}face cards{}",
+            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { xmult_mod = 0.05, xmult = 1 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.xmult_mod, card.ability.extra.xmult } }
+    end,
+    calculate = function(self, card, context)
+        if context.before and context.cardarea == G.jokers and not context.blueprint then
+            -- loop through hand to check for face cards
+            local face_card = false
+            for _, playing_card in ipairs(context.full_hand) do
+                if playing_card:get_id() >= 11 then
+                    face_card = true
+                    break
+                end
+            end
+
+            if not face_card then
+                card.ability.extra.xmult = card.ability.extra.xmult + card.ability.extra.xmult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            else
+                card.ability.extra.xmult = 1
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_reset')})
+            end
+        end
+
+        if context.joker_main and card.ability.extra.xmult > 1 then
+            return {
+                Xmult_mod = card.ability.extra.xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+            }
+        end
+    end
+}
+-- checkered deck
+SMODS.Joker {
+    -- since checkered deck has only spades and hearts, X3 mult if scoring hand contains both spades and hearts
+    yes_pool_flag = "birthright_checkered_deck",
+    key = "birthright_checkered",
+    loc_txt = {
+        name = "Birthright (Checkered Deck)",
+        text = {
+            "{X:mult,C:white}X#1#{} Mult if",
+            "{C:attention}scoring hand{} contains",
+            "{V:1}Hearts{} and {V:2}Spades{}",
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { xmult = 3 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.xmult, colours = {G.C.SUITS["Hearts"], G.C.SUITS["Spades"]}} }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main then
+            local hearts, spades = false, false
+            for _, v in ipairs(context.scoring_hand) do
+                if v:is_suit('Hearts', nil, true) then
+                    hearts = true
+                elseif v:is_suit('Spades', nil, true) then
+                    spades = true
+                end
+            end
+            if hearts and spades then
+                return {
+                    Xmult_mod = card.ability.extra.xmult,
+                    message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+                }
+            end
+        end
+    end
+}
+-- zodiac deck
+SMODS.Joker {
+    -- since zodiac deck gives planet and tarot merchant, give +2 mult for each planet or tarot card purchased from shop
+    yes_pool_flag = "birthright_zodiac_deck",
+    key = "birthright_zodiac",
+    loc_txt = {
+        name = "Birthright (Zodiac Deck)",
+        text = {
+            "This Joker gains {C:mult}+#1#{} Mult",
+            "per {C:planet}Planet{} or {C:tarot}Tarot{}",
+            "card purchased from Shop",
+            "{C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { mult_mod = 2, mult = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
+    end,
+    calculate = function(self, card, context)
+        if context.buying_card and (context.card.ability.set == "Planet" or context.card.ability.set == "Tarot") and not context.blueprint then
+            card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+        end
+
+        if context.joker_main and card.ability.extra.mult > 0 then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+    end
+}
+-- TODO: painted deck
+SMODS.Joker {
+    -- since painted deck gives larger hand size, 
+    yes_pool_flag = "birthright_painted_deck",
+    key = "birthright_painted",
+    loc_txt = {
+        name = "Birthright (Painted Deck)",
+        text = {
+            ""
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { mult_mod = 2, mult = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
+    end,
+    calculate = function(self, card, context)
+        
+    end
+}
+-- TODO: anaglyph deck 
+SMODS.Joker {
+    -- since anaglyph deck gives double tags, 
+    yes_pool_flag = "birthright_anaglyph_deck",
+    key = "birthright_anaglyph",
+    loc_txt = {
+        name = "Birthright (Anaglyph Deck)",
+        text = {
+            ""
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { mult_mod = 2, mult = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
+    end,
+    calculate = function(self, card, context)
+
+    end
+}
+-- TODO: plasma deck
+SMODS.Joker {
+    -- since plasma deck balances chips and mult, 
+    yes_pool_flag = "birthright_plasma_deck",
+    key = "birthright_plasma",
+    loc_txt = {
+        name = "Birthright (Plasma Deck)",
+        text = {
+            ""
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { mult_mod = 2, mult = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
+    end,
+    calculate = function(self, card, context)
+
+    end
+}
+-- TODO: erratic deck
+SMODS.Joker {
+    -- since plasma deck balances chips and mult, 
+    yes_pool_flag = "birthright_erratic_deck",
+    key = "birthright_erratic",
+    loc_txt = {
+        name = "Birthright (Erratic Deck)",
+        text = {
+            ""
+        }
+    },
+    pos = {
+        x = 5,
+        y = 64
+    },
+    config = { extra = { mult_mod = 2, mult = 0 } },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
+    end,
+    calculate = function(self, card, context)
+
+    end
+}
+
+function SMODS.current_mod.reset_game_globals(run_start)
+    -- Set yes flag for the selected deck
+    local flag_name = back2flag[G.GAME.selected_back.name or "Default"] or "birthright_default_deck"
+    G.GAME.pool_flags[flag_name] = true
+    -- Reset other flags
+    for _, flag in pairs(back2flag) do
+        if flag ~= flag_name then
+            G.GAME.pool_flags[flag] = false
+        end
+    end
+end
+
 
 -- Qualtiy 4 Jokers (all rare)
 
@@ -2604,14 +3279,15 @@ SMODS.Challenge {
         {id = "v_reroll_glut"},
         {id = "v_tarot_merchant"},
         {id = "v_tarot_tycoon"},
+        {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_sacredorb"}, 
+        {id = "j_itro_birthright_zodiac"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
         -- {id = "j_blue_joker"},
-        -- {id = "j_oops"},
+        {id = "j_oops"},
         -- {id = "j_hanging_chad"},
     },
     unlocked = true
