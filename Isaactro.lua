@@ -230,8 +230,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Pageant Boy',
         text = {
-            "Earn {C:attention}$#1#{} after",
-            "defeating each {C:attention}Boss Blind{}"
+            "Earn {C:money}$#1#{} after",
+            "defeating each",
+            "{C:attention}Boss Blind{}"
         }
     },
     config = { extra = { money = 7 } },
@@ -267,7 +268,7 @@ SMODS.Joker {
         name = 'Dead Bird',
         text = {
             "Each scored card on",
-            "{C:attention}last hand{} of round",
+            "{C:attention}Last Hand{} of round",
             "gives {C:mult}+#1#{} Mult"
         }
     },
@@ -411,8 +412,9 @@ SMODS.Joker {
         name = 'The Bible',
         text = {
             "If {C:attention}First Hand{} of round",
-            "has only {C:attention}1{} card, each",
-            "card held permanently gains {C:chips}+#1#{} Chips",
+            "has only {C:attention}1{} card,",
+            "each card held permanently",
+            "gains {C:chips}+#1#{} Chips"
         }
     },
     config = { extra = { chip_mod = 8, used = false } },
@@ -942,8 +944,6 @@ SMODS.Joker {
     atlas = 'IsaactroJokers',
 
     loc_vars = function(self, info_queue, card)
-        info_queue[#info_queue+1] = {key = 'tag_itro_cubeofmeat', set = 'Tag'}
-
         return { vars = { card.ability.extra.chip_mod, card.ability.extra.chips } }
     end,
 
@@ -1754,9 +1754,9 @@ SMODS.Joker {
         name = 'Technology',
         text = {
             "If a {C:attention}Four of a Kind{} is played",
-            "with {C:attention}1{} unscored card,",
-            "convert the unscored card's rank",
-            "to the rank of the other cards"
+            "with {C:attention}1 unscored card,",
+            "convert it to the {C:attention}rank",
+            "{C:attention}of the other cards"
         }
     },
     config = { extra = { } },
