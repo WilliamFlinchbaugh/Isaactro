@@ -2413,6 +2413,59 @@ SMODS.Joker {
     end
 }
 
+-- Sacred Heart (rare)
+
+
+-- Godhead (rare)
+
+
+-- Polyphemus (rare)
+SMODS.Joker {
+    -- X4, but only 1 hand and 1 discard per round
+    key = "polyphemus",
+    loc_txt = {
+        name = "Polyphemus",
+        text = {
+            "{X:mult,C:white}X#1#{} Mult",
+            "Sets {C:blue}hands{} to {C:attention}#2#{} and",
+            "{C:red}discards{} to {C:attention}#3#{} when",
+            "{C:attention}Blind{} is selected"
+        }
+    },
+    config = { extra = { Xmult = 4, hands = 1, discards = 1 } },
+    pos = {
+        x = 0,
+        y = 29
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.Xmult, card.ability.extra.hands, card.ability.extra.discards }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            return {
+                Xmult_mod = card.ability.extra.Xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
+            }
+        end
+
+        if context.setting_blind and not context.blueprint then
+            ease_hands_played(-G.GAME.current_round.hands_left + card.ability.extra.hands, nil)
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = "1 Hand!"})
+            ease_discard(-G.GAME.current_round.discards_left + card.ability.extra.discards, nil, true)
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = "1 Discard!"})
+        end
+    end
+}
+
 -- Tester challenge to test jokers
 SMODS.Challenge {
     loc_txt = "Isaactro Tester",
@@ -2437,9 +2490,7 @@ SMODS.Challenge {
         {id = "v_tarot_tycoon"},
     },
     jokers = { 
-        {id = "j_itro_brimstone", eternal = true}, 
-        {id = "j_itro_magicmushroom"}, 
-        {id = "j_itro_crookedpenny"}, 
+        {id = "j_itro_polyphemus"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
