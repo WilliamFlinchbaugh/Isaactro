@@ -1561,19 +1561,18 @@ SMODS.Joker {
 }
 
 -- Jesus Juice (common)
--- TODO: More interesting effect needed
 SMODS.Joker {
-    -- Each played diamond or heart gives +2 mult and +5 chips
+    -- X2 Mult, loses X0.05 Mult for each hand played
     key = "jesusjuice",
     loc_txt = {
         name = 'Jesus Juice',
         text = {
-            "Each played {C:attention}Diamond{} or {C:attention}Heart{}",
-            "gives {C:chips}+#2#{} Chips and",
-            "{C:mult}+#1#{} Mult when scored"
+            "{X:mult,C:white}X#1#{} Mult",
+            "Loses {X:mult,C:white}X#2#{} Mult for",
+            "each hand played"
         }
     },
-    config = { extra = { mult = 2, chips = 3 } },
+    config = { extra = { xmult = 2, xmult_mod = 0.05 } },
     pos = {
         x = 2,
         y = 31
@@ -1587,16 +1586,27 @@ SMODS.Joker {
     atlas = 'IsaactroJokers',
 
     loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.chips, card.ability.extra.mult }}
+        return {vars = { card.ability.extra.xmult, card.ability.extra.xmult_mod }}
     end,
 
     calculate = function(self, card, context)
-        if context.cardarea == G.play and context.other_card then
-            if context.other_card:is_suit("Diamonds") or context.other_card:is_suit("Hearts") then
+        if context.joker_main then
+            return {
+                Xmult_mod = card.ability.extra.xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+            }
+        end
+
+        if context.cardarea == G.jokers and context.after and not context.blueprint then
+            card.ability.extra.xmult = card.ability.extra.xmult - card.ability.extra.xmult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = "-X" .. tostring(card.ability.extra.xmult_mod) .. " Mult", colour = G.C.MULT})
+            if card.ability.extra.xmult <= 0 then
+                G.jokers:remove_card(card)
+                card:remove()
+                card = nil
                 return {
-                    mult = card.ability.extra.mult,
-                    chips = card.ability.extra.chips,
-                    card = card
+                    message = localize('k_eaten_ex'),
+                    colour = G.C.RED
                 }
             end
         end
@@ -3432,7 +3442,7 @@ SMODS.Challenge {
         {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_breakfast"}, 
+        {id = "j_itro_jesusjuice"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
