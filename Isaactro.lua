@@ -39,6 +39,50 @@ local function level_of_most_played()
     return G.GAME.hands[hand].level or 1
 end
 
+local function planet_of_most_played()
+    local _planet, _hand, _tally = nil, nil, 0
+    for k, v in ipairs(G.handlist) do
+        if G.GAME.hands[v].visible and G.GAME.hands[v].played > _tally then
+            _hand = v
+            _tally = G.GAME.hands[v].played
+        end
+    end
+    if _hand then
+        for k, v in pairs(G.P_CENTER_POOLS.Planet) do
+            if v.config.hand_type == _hand then
+                _planet = v.key
+            end
+        end
+    end
+    return _planet
+end
+
+local function num_jokers()
+    if G and G.jokers and G.jokers.cards then
+        return #G.jokers.cards
+    else
+        return 0
+    end
+end
+
+local function num_consumables()
+    if G and G.consumeables and G.consumeables.cards then
+        return #G.consumeables.cards
+    else
+        return 0
+    end
+end
+
+local function consumable_slots_full()
+    if G and G.consumeables and #G.consumeables.cards + G.GAME.consumeable_buffer >= G.consumeables.config.card_limit then
+        return 1
+    else
+        return 0
+    end
+end
+
+
+
 
 -- QUALITY 0 JOKERS (all common)
 
@@ -156,8 +200,8 @@ SMODS.Joker {
         name = 'Box',
         text = {
             "After {C:attention}#1#{} rounds, sell this card",
-            "to gain {C:attention}1{} random {C:attention}Planet Card{}",
-            "and {C:attention}1{} random {C:attention}Tarot Card{}",
+            "to gain {C:attention}1{} random",
+            "{C:blue}Planet{} and {C:purple}Tarot{} card",
             "{C:inactive}(Currently {C:attention}#2#{C:inactive}/#1#)"
         }
     },
@@ -343,9 +387,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Little Baggy',
         text = {
-            "When {C:attention}Tarot Card{} is purchased,",
+            "When {C:purple}Tarot{} card is purchased,",
             "destroy it and gain a random",
-            "{C:attention}Planet Card{}"
+            "{C:blue}Planet{} card"
         }
     },
     pos = {
@@ -631,7 +675,7 @@ SMODS.Joker {
             "When {C:red}Cube of Meat{} is purchased,",
             "this joker gains {X:mult,C:white}X#1#{} Mult and",
             "destroys the other {C:red}Cube of Meat{}",
-            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive}){}",
+            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult){}",
             "Gain a {C:attention}Cube of Meat Tag{}",
             "after {C:attention}#3# rerolls{}",
             "{C:inactive}(Currently {C:attention}#4#{C:inactive}/#3#)"
@@ -727,7 +771,7 @@ SMODS.Joker {
             "This joker gains {C:chips}+#1#{} Chips",
             "for each {C:attention}consecutive{} round",
             "won playing only {C:attention}one hand{}",
-            "{C:inactive}(Currently {C:chips}+#2#{C:inactive}){}"
+            "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips){}"
         }
     },
     config = { extra = { chip_mod = 20, chips = 0 } },
@@ -784,7 +828,7 @@ SMODS.Joker {
         name = 'Booster Pack',
         text = {
             "After {C:attention}#1#{} rounds, sell this card",
-            "to gain {C:attention}#2# Negative Tarot Cards{}",
+            "to gain {C:attention}#2#{} Negative {C:purple}Tarot{} cards",
             "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
         }
     },
@@ -927,7 +971,7 @@ SMODS.Joker {
         text = {
             "This Joker gains {C:chips}+#1#{} Chips",
             "for each {C:attention}round played{}",
-            "{C:inactive}(Currently {C:chips}+#2#{C:inactive}){}"
+            "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips){}"
         }
     },
     config = { extra = { chip_mod = 9, chips = 0 } },
@@ -1282,7 +1326,7 @@ SMODS.Joker {
             "This {C:attention}Joker{} gains {C:chips}+#1#{} Chips",
             "for {C:attention}each time{} a played card",
             "is {C:attention}Retriggered{}",
-            "{C:inactive}(Currently {C:chips}+#2#{C:inactive}){}"
+            "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips){}"
         }
     },
     config = { extra = { chip_mod = 3, chips = 0, triggers = 0, cards_played = 0 } },
@@ -1494,7 +1538,7 @@ SMODS.Joker {
         text = {
             "When {C:attention}Planet Card{} is purchased,",
             "destroy it and gain a random",
-            "{C:attention}Tarot Card{}",
+            "{C:purple}Tarot{} Card",
             "{C:attention}+#1#{} Consumable Slots"
         }
     },
@@ -2011,7 +2055,7 @@ SMODS.Joker {
             "each consecutive {C:attention}same{}",
             "{C:attention}poker hand{} played",
             "{C:inactive}(Last played {C:attention}#2#{C:inactive})",
-            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive})"
+            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
         }
     },
     config = { extra = { Xmult_mod = 0.1, Xmult = 1, Xmult_init = 1, last_played = "None" } },
@@ -2213,7 +2257,7 @@ SMODS.Joker {
             "{C:mult}+#1#{} Mult for every",
             "{C:money}$#2#{} you spend in Shop",
             "{C:inactive}(Excluding rerolls)",
-            "{C:inactive}(Currently {C:money}$#3#{C:inactive} = {C:mult}+#4#{C:inactive})"
+            "{C:inactive}(Currently {C:money}$#3#{C:inactive} = {C:mult}+#4#{C:inactive} Mult)"
         }
     },
     pos = {
