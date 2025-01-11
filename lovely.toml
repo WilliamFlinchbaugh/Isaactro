@@ -24,7 +24,7 @@ match_indent = true
 
 
 
-#Spoon Bender plasma effect
+# Spoon Bender plasma effect
 [[patches]]
 [patches.pattern]
 target = "back.lua"
@@ -38,7 +38,7 @@ overwrite = true
 
 
 
-
+# function calculate_balance() to check if spoon bender is held
 [[patches]]
 [patches.pattern]
 target = "back.lua"
@@ -55,5 +55,26 @@ calculate_balance = function()
         end
     end
     return false
+end
+'''
+
+
+# Plasma deck birthright effect
+[[patches]]
+[patches.pattern]
+target = "back.lua"
+pattern = '''
+if (self.name == 'Plasma Deck' or calculate_balance()) and args.context == 'final_scoring_step' then
+'''
+position = "after"
+match_indent = true
+payload = '''
+-- check if plasma birthright is held
+for _, joker in ipairs(G.jokers.cards) do
+    if joker.config.center.key == "j_itro_birthright_plasma" then
+        -- call birthright calculate to see if it needs to upgrade
+        joker:calculate_joker({before_plasma = true, current_mult = args.mult, current_chips = args.chips})
+        break
+    end
 end
 '''

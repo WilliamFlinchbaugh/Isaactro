@@ -56,6 +56,28 @@ local function planet_of_most_played()
     return _planet
 end
 
+local function highest_count_rank()
+    if not G or not G.playing_cards then return "Ace" end
+    local ranks = {}
+    for _, v in ipairs(G.playing_cards) do
+        if v.base.value then
+            if not ranks[v.base.value] then
+                ranks[v.base.value] = 1
+            else
+                ranks[v.base.value] = ranks[v.base.value] + 1
+            end
+        end
+    end
+    local highest_rank, highest = 1, 0
+    for k, v in pairs(ranks) do
+        if v > highest then
+            highest_rank = k
+            highest = v
+        end
+    end
+    return highest_rank
+end
+
 local function num_jokers()
     if G and G.jokers and G.jokers.cards then
         return #G.jokers.cards
@@ -2837,22 +2859,25 @@ SMODS.Joker {
         end
     end
 }
--- TODO: painted deck
+-- painted deck
 SMODS.Joker {
-    -- since painted deck gives larger hand size, 
+    -- since painted deck gives larger hand size, This joker gains +1 mult for each enhanced card held in hand
     yes_pool_flag = "birthright_painted_deck",
     key = "birthright_painted",
     loc_txt = {
         name = "Birthright (Painted Deck)",
         text = {
-            ""
+            "This Joker gains {C:mult}+#1#{} Mult",
+            "per {C:attention}Enhanced card",
+            "held in hand",
+            "{C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult)"
         }
     },
     pos = {
         x = 5,
         y = 64
     },
-    config = { extra = { mult_mod = 2, mult = 0 } },
+    config = { extra = { mult_mod = 1, mult = 0 } },
     cost = 7,
     rarity = 3,
     blueprint_compat = true,
@@ -2864,18 +2889,38 @@ SMODS.Joker {
         return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
     end,
     calculate = function(self, card, context)
-        
+        if context.cardarea == G.hand and context.individual and context.other_card and context.other_card.ability.set == "Enhanced" and not context.blueprint and not context.end_of_round then
+            if context.other_card.debuff then
+                return {
+                    message = localize('k_debuffed'),
+                    colour = G.C.RED,
+                    card = card,
+                }
+            end
+            card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_mod
+            return {
+                message = localize('k_upgrade_ex'),
+                card = card,
+            }
+        end
+
+        if context.joker_main and card.ability.extra.mult > 0 then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
     end
 }
--- TODO: anaglyph deck 
+-- anaglyph deck 
 SMODS.Joker {
-    -- since anaglyph deck gives double tags, 
+    -- since anaglyph deck gives double tags, this joker gives and extra double tag when boss blind is defeated
     yes_pool_flag = "birthright_anaglyph_deck",
     key = "birthright_anaglyph",
     loc_txt = {
         name = "Birthright (Anaglyph Deck)",
         text = {
-            ""
+            "Gain an extra {C:attention}Double Tag{}",
+            "when {C:attention}Boss Blind{} is defeated"
         }
     },
     pos = {
@@ -2891,28 +2936,48 @@ SMODS.Joker {
     discovered = true,
     atlas = 'IsaactroJokers',
     loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue+1] = {key = 'tag_double', set = 'Tag'}
         return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
     end,
     calculate = function(self, card, context)
-
+        if context.end_of_round and not context.repetition and not context.individual and G.GAME.blind.boss then
+            G.E_MANAGER:add_event(Event({
+                func = (function()
+                    local tag = Tag("tag_double")
+                    add_tag(tag)
+                    play_sound('generic1', 0.9 + math.random()*0.1, 0.8)
+                    play_sound('holo1', 1.2 + math.random()*0.1, 0.4)
+                    return true
+                end)
+            }))
+            return {
+                message = "Tag!",
+                card = card or context.blueprint_card
+            }
+        end
     end
 }
--- TODO: plasma deck
+-- plasma deck
 SMODS.Joker {
-    -- since plasma deck balances chips and mult, 
+    -- this joker gains 0.2x mult after each hand played where the mult is at least 4x the chips before balancing
     yes_pool_flag = "birthright_plasma_deck",
     key = "birthright_plasma",
     loc_txt = {
         name = "Birthright (Plasma Deck)",
         text = {
-            ""
+            "This Joker gains {X:mult,C:white}X#1#{} Mult",
+            "after each hand played where",
+            "{C:mult}Mult{} is at least {C:mult}#2#X{} greater",
+            "than {C:chips}Chips{} before balancing",
+            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
+
         }
     },
     pos = {
         x = 5,
         y = 64
     },
-    config = { extra = { mult_mod = 2, mult = 0 } },
+    config = { extra = { xmult_mod = 0.2, ratio = 4, xmult = 1 } },
     cost = 7,
     rarity = 3,
     blueprint_compat = true,
@@ -2921,28 +2986,45 @@ SMODS.Joker {
     discovered = true,
     atlas = 'IsaactroJokers',
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
+        return { vars = { card.ability.extra.xmult_mod, card.ability.extra.ratio, card.ability.extra.xmult } }
     end,
     calculate = function(self, card, context)
+        if context.joker_main then
+            return {
+                Xmult_mod = card.ability.extra.xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+            }
+        end
 
+        -- patched to call this function after the hand is played and before the plasma deck balances chips and mult
+        -- current chips and mult are stored in context.current_mult and context.current_chips
+        if context.before_plasma and not context.blueprint then
+            if context.current_mult >= context.current_chips * card.ability.extra.ratio then
+                card.ability.extra.xmult = card.ability.extra.xmult + card.ability.extra.xmult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            end
+        end
     end
 }
--- TODO: erratic deck
+-- erratic deck
 SMODS.Joker {
-    -- since plasma deck balances chips and mult, 
+    -- since erratic deck has random number of each rank and suit, X4 mult if hand only contains the rank with the most cards in the deck
     yes_pool_flag = "birthright_erratic_deck",
     key = "birthright_erratic",
     loc_txt = {
         name = "Birthright (Erratic Deck)",
         text = {
-            ""
+            "{X:mult,C:white}X#1#{} Mult if hand only contains",
+            "cards of rank with the {C:attention}highest",
+            "{C:attention}card count{} in full deck",
+            "{C:inactive}(Currently {C:attention}#2#s{C:inactive})"
         }
     },
     pos = {
         x = 5,
         y = 64
     },
-    config = { extra = { mult_mod = 2, mult = 0 } },
+    config = { extra = { xmult = 4 } },
     cost = 7,
     rarity = 3,
     blueprint_compat = true,
@@ -2951,13 +3033,25 @@ SMODS.Joker {
     discovered = true,
     atlas = 'IsaactroJokers',
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.mult_mod, card.ability.extra.mult } }
+        return { vars = { card.ability.extra.xmult, highest_count_rank() } }
     end,
     calculate = function(self, card, context)
-
+        if context.joker_main then
+            local rank = highest_count_rank()
+            for _, v in ipairs(context.full_hand) do
+                if v.base.value ~= rank then
+                    return
+                end
+            end
+            return {
+                Xmult_mod = card.ability.extra.xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+            }
+        end
     end
 }
 
+-- function to set the yes flag for the selected deck so that only the correct birthright joker is in the pool
 function SMODS.current_mod.reset_game_globals(run_start)
     -- Set yes flag for the selected deck
     local flag_name = back2flag[G.GAME.selected_back.name or "Default"] or "birthright_default_deck"
@@ -3282,13 +3376,16 @@ SMODS.Challenge {
         {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_birthright_zodiac"}, 
+        {id = "j_itro_birthright_erratic"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
-        -- {id = "j_blue_joker"},
         {id = "j_oops"},
         -- {id = "j_hanging_chad"},
+    },
+    consumeables = {
+        {id = "c_magician"},
+        {id = "c_fool"}
     },
     unlocked = true
 }
