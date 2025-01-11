@@ -103,7 +103,7 @@ local function consumable_slots_full()
 end
 
 
--- QUALITY 0 JOKERS (all common)
+-- QUALITY 0 JOKERS (6) (all common)
 
 -- Missing No.
 SMODS.Joker {
@@ -465,7 +465,7 @@ SMODS.Joker {
     end
 }
 
--- Quality 1 Jokers (all common or uncommon)
+-- Quality 1 Jokers (9) (all common or uncommon)
 
 -- The Bible (uncommon)
 SMODS.Joker {
@@ -979,7 +979,63 @@ SMODS.Joker {
     end
 }
 
--- Quality 2 Jokers (all uncommon or common)
+-- Breakfast (common)
+SMODS.Joker {
+    -- +20 chips, +20 mult, -4 chips and -4 mult for each round played
+    key = "breakfast",
+    loc_txt = {
+        name = 'Breakfast',
+        text = {
+            "{C:chips}+#1#{} Chips",
+            "{C:mult}+#2#{} Mult",
+            "{C:chips}-#3#{} Chips, {C:mult}-#4#{} Mult for",
+            "each hand played"
+        }
+    },
+    config = { extra = { mult = 10, chips = 50, mult_decrease = 1, chips_decrease = 5 } },
+    pos = {
+        x = 5,
+        y = 19
+    },
+    cost = 3,
+    rarity = 1,
+    blueprint_compat = true,
+    eternal_compat = false,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.chips_decrease, card.ability.extra.mult_decrease }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            return {
+                chips = card.ability.extra.chips,
+                mult = card.ability.extra.mult
+            }
+        end
+
+        if context.cardarea == G.jokers and context.after and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips - card.ability.extra.chips_decrease
+            card.ability.extra.mult = card.ability.extra.mult - card.ability.extra.mult_decrease
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = tostring(-card.ability.extra.chips_decrease), colour = G.C.CHIPS})
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = tostring(-card.ability.extra.mult_decrease) .. " Mult", colour = G.C.MULT})
+            if card.ability.extra.chips <= 0 or card.ability.extra.mult <= 0 then
+                G.jokers:remove_card(card)
+                card:remove()
+                card = nil
+                return {
+                    message = localize('k_eaten_ex'),
+                    colour = G.C.RED
+                }
+            end
+        end
+    end
+}
+
+-- Quality 2 Jokers (11) (all uncommon or common)
 
 -- Guppy's Head (common)
 SMODS.Joker {
@@ -1525,7 +1581,7 @@ SMODS.Joker {
     cost = 4,
     rarity = 1,
     blueprint_compat = true,
-    eternal_compat = true,
+    eternal_compat = false,
     unlocked = true,
     discovered = true,
     atlas = 'IsaactroJokers',
@@ -1668,7 +1724,7 @@ SMODS.Joker {
     end
 }
 
--- Quality 3 Jokers (all uncommon or rare)
+-- Quality 3 Jokers (15) (all uncommon or rare)
 
 -- Forget Me Now (rare)
 SMODS.Joker { 
@@ -3065,7 +3121,7 @@ function SMODS.current_mod.reset_game_globals(run_start)
 end
 
 
--- Qualtiy 4 Jokers (all rare)
+-- Qualtiy 4 Jokers (7) (all rare)
 
 -- The D6 (rare)
 SMODS.Joker {
@@ -3376,7 +3432,7 @@ SMODS.Challenge {
         {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_birthright_erratic"}, 
+        {id = "j_itro_breakfast"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
