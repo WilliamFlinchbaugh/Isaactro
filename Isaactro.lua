@@ -465,7 +465,7 @@ SMODS.Joker {
     end
 }
 
--- Quality 1 Jokers (9) (all common or uncommon)
+-- Quality 1 Jokers (10) (all common or uncommon)
 
 -- The Bible (uncommon)
 SMODS.Joker {
@@ -1731,6 +1731,39 @@ SMODS.Joker {
                 }
             end
         end
+    end
+}
+
+-- Head of the Keeper (common)
+SMODS.Joker {
+    -- 1$ for each hand played at the end of the round
+    key = "headofthekeeper",
+    loc_txt = {
+        name = 'Head of the Keeper',
+        text = {
+            "Earn {C:money}$#1#{} per hand played",
+            "at the end of the round"
+        }
+    },
+    config = { extra = { money = 1 } },
+    pos = {
+        x = 5,
+        y = 50
+    },
+    cost = 4,
+    rarity = 1,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.money }}
+    end,
+
+    calc_dollar_bonus = function(self, card)
+        return card.ability.extra.money * G.GAME.current_round.hands_played
     end
 }
 
@@ -3442,7 +3475,7 @@ SMODS.Challenge {
         {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_jesusjuice"}, 
+        {id = "j_itro_headofthekeeper"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
