@@ -102,6 +102,25 @@ local function consumable_slots_full()
     end
 end
 
+local function all_unlocked_hands()
+    local unlocked_hands = {}
+    for _, v in ipairs(G.handlist) do
+        if G.GAME.hands[v].visible then
+            table.insert(unlocked_hands, v)
+        end
+    end
+    return unlocked_hands
+end
+
+local function all_hands_meet_level(level)
+    for _, v in ipairs(all_unlocked_hands()) do
+        if G.GAME.hands[v].visible and (G.GAME.hands[v].level or 1) < level then
+            return false
+        end
+    end
+    return true
+end
+
 
 -- QUALITY 0 JOKERS (6) (all common)
 
@@ -1035,7 +1054,7 @@ SMODS.Joker {
     end
 }
 
--- Quality 2 Jokers (11) (all uncommon or common)
+-- Quality 2 Jokers (12) (all uncommon or common)
 
 -- Guppy's Head (common)
 SMODS.Joker {
@@ -3329,11 +3348,47 @@ SMODS.Joker {
 
 
 -- Godhead (rare)
+SMODS.Joker {
+    -- X6 mult if all unlocked hands are at least level 4
+    key = "godhead",
+    loc_txt = {
+        name = "Godhead",
+        text = {
+            "{X:mult,C:white}X#1#{} Mult if all",
+            "unlocked hands are",
+            "at least {C:attention}Level #2#{}"
+        }
+    },
+    config = { extra = { Xmult = 6, min_lvl = 4 } },
+    pos = {
+        x = 3,
+        y = 42
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
 
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.Xmult, card.ability.extra.min_lvl }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main and all_hands_meet_level(card.ability.extra.min_lvl) then
+            return {
+                Xmult_mod = card.ability.extra.Xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
+            }
+        end
+    end
+}
 
 -- Polyphemus (rare)
 SMODS.Joker {
-    -- X4, but only 1 hand and 1 discard per round
+    -- X4 mult, but only 1 hand and 1 discard per round
     key = "polyphemus",
     loc_txt = {
         name = "Polyphemus",
@@ -3475,7 +3530,7 @@ SMODS.Challenge {
         {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_headofthekeeper"}, 
+        {id = "j_itro_godhead"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
