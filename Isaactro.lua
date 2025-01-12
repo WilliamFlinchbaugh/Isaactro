@@ -3182,7 +3182,6 @@ function SMODS.current_mod.reset_game_globals(run_start)
     end
 end
 
-
 -- Qualtiy 4 Jokers (7) (all rare)
 
 -- The D6 (rare)
@@ -3345,7 +3344,56 @@ SMODS.Joker {
 }
 
 -- Sacred Heart (rare)
+SMODS.Joker {
+    -- X3 if highest rank scoring card is a Heart
+    key = "sacredheart",
+    loc_txt = {
+        name = "Sacred Heart",
+        text = {
+            "{X:mult,C:white}X#1#{} Mult if",
+            "{C:attention}highest rank{} scoring",
+            "card is {V:1}Hearts"
+        }
+    },
+    config = { extra = { Xmult = 3 } },
+    pos = {
+        x = 9,
+        y = 29
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
 
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.Xmult, colours = {G.C.SUITS["Hearts"]}}}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            -- find highest rank in scoring hand
+            local highest_rank = 0
+            for _, v in ipairs(context.scoring_hand) do
+                if v.base.id > highest_rank then
+                    highest_rank = v.base.id
+                end
+            end
+
+            -- check if highest rank is a heart
+            for _, v in ipairs(context.scoring_hand) do
+                if v.base.id == highest_rank and v:is_suit('Hearts', nil, true) then
+                    return {
+                        Xmult_mod = card.ability.extra.Xmult,
+                        message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
+                    }
+                end
+            end
+        end
+    end
+}
 
 -- Godhead (rare)
 SMODS.Joker {
@@ -3530,7 +3578,7 @@ SMODS.Challenge {
         {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_godhead"}, 
+        {id = "j_itro_sacredheart"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
