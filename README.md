@@ -11,6 +11,8 @@ Assets were scraped from the Isaac Wiki (as seen in [create_joker_art.ipynb](htt
 
 I took a lot of inspiration and implementation help from the ExtraCredit mod found here: [ExtraCredit](https://github.com/GuilloryCraft/ExtraCredit)
 
+I didn't find this until just after I released this, but HYPERPUP seems to have made a pretty cool Isaac-themed mod that is a lot more comprehensive, find it here: [The Binding of Jimbo](https://jimbo.hyperpup.pet/)
+
 ## Notes
 For the art, I really wanted to have unique art for each, but I'm just not an artist and don't have money to spend to commission it. If someone is willing to do some art, I'd be super happy to update with new assets. I may still create assets myself in the future if I find the time.
 
