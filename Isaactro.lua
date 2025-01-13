@@ -3,17 +3,25 @@ SMODS.Atlas {
     path = "isaactro_jokers.png", 
     px = 71,
     py = 95
-}
+}:register()
 
 SMODS.Atlas {
     key = "IsaactroTags", 
     path = "isaactro_tags.png", 
     px = 34,
     py = 34
-}
+}:register()
 
 SMODS.current_mod.config_tab = function() --Config tab
-    return {}
+    return {
+        n = G.UIT.ROOT,
+        config = {
+          align = "cm",
+          padding = 0.05,
+          colour = G.C.CLEAR,
+        },
+        nodes = {},
+      }
 end
 
 -- Helper functions
