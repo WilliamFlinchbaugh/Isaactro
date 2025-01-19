@@ -1975,13 +1975,13 @@ SMODS.Joker {
     loc_txt = {
         name = "Holy Light",
         text = {
-            "{C:green}#1# in #2#{} chance",
-            "each played card to gain",
-            "random {C:attention}Enhancement{} or {C:attention}Edition",
-            "when scored"
+            "{C:green}#1# in #2#{} chance for each",
+            "{C:attention}scoring card without",
+            "Enhancement or Edition to gain a random",
+            "{C:attention}Enhancement{} or {C:attention}Edition"
         }
     },
-    config = { extra = { odds = 4, enhancement_odds = 0.7 } },
+    config = { extra = { odds = 4 } },
     pos = {
         x = 9,
         y = 45
@@ -1997,39 +1997,36 @@ SMODS.Joker {
         return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds }}
     end,
     calculate = function(self, card, context)
-        if context.cardarea == G.play and context.individual and not context.blueprint then
-            if pseudorandom('holylight') < 1 / 5 then
-                -- check for enhancement or edition
-                if pseudorandom('holylight') < card.ability.extra.enhancement_odds then
-                    local cen_pool = {}
-                    for k, v in pairs(G.P_CENTER_POOLS["Enhanced"]) do
-                        if v.key ~= 'm_stone' and not v.overrides_base_rank then
-                            cen_pool[#cen_pool + 1] = v
+        if context.cardarea == G.jokers and context.before and not context.blueprint then
+            local triggered = false
+            for _, p_card in ipairs(context.scoring_hand) do
+                if p_card.ability.set == "Enhanced" or p_card.edition then
+                    goto continue
+                end 
+
+                if pseudorandom('holylight') < G.GAME.probabilities.normal / card.ability.extra.odds then
+                    triggered = true
+
+                    -- check if enhancement or edition
+                    if pseudorandom('holylight') > 0.5 then
+                        local cen_pool = {}
+                        for _, v in pairs(G.P_CENTER_POOLS["Enhanced"]) do
+                            if v.key ~= 'm_stone' and not v.overrides_base_rank then
+                                cen_pool[#cen_pool + 1] = v
+                            end
                         end
+                        local enhancement = pseudorandom_element(cen_pool, pseudoseed('holylight'))
+                        p_card:set_ability(enhancement, nil, true)
+                    else
+                        local edition = pseudorandom_element(p_card_editions, pseudoseed('holylight'))
+                        p_card:set_edition(edition)
                     end
-                    local enhancement = pseudorandom_element(cen_pool, pseudoseed('holylight'))
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            card:juice_up(0.3, 0.4)
-                            context.other_card:set_ability(enhancement, nil, true)
-                            context.other_card:juice_up(0.3, 0.4)
-                            return true
-                        end
-                    })) 
-                else
-                    local edition = pseudorandom_element(p_card_editions, pseudoseed('holylight'))
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            card:juice_up(0.3, 0.4)
-                            context.other_card:set_edition(edition)
-                            context.other_card:juice_up(0.3, 0.4)
-                            return true
-                        end
-                })) 
+                    card_eval_status_text(p_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
                 end
-
-
-                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+                ::continue::
+            end
+            if triggered then
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = "Blessed!", colour = G.C.BLUE})
             end
         end
     end
@@ -3597,41 +3594,41 @@ SMODS.Joker {
 }
 
 -- Tester challenge to test jokers
--- SMODS.Challenge {
---     loc_txt = "Isaactro Tester",
---     key = "isaactro_tester",
---     rules = {
---         custom = {},
---         modifiers = {
---             {id = 'hands', value = 10},
---             {id = 'discards', value = 10},
---             {id = 'joker_slots', value = 10},
---             {id = 'dollars', value = 10000}
---         }
---     },
---     vouchers = {
---         {id = "v_overstock_norm"},
---         {id = "v_overstock_plus"},
---         {id = "v_paint_brush"},
---         {id = "v_palette"},
---         {id = "v_reroll_surplus"},
---         {id = "v_reroll_glut"},
---         {id = "v_tarot_merchant"},
---         {id = "v_tarot_tycoon"},
---         {id = "v_telescope"}
---     },
---     jokers = { 
---         {id = "j_itro_sacredheart"}, 
---         {id = "j_blueprint", eternal = true},
---         {id = "j_bootstraps"},
---         {id = "j_cavendish"},
---         {id = "j_oops"},
---         -- {id = "j_hanging_chad"},
---     },
---     consumeables = {
---         {id = "c_magician"},
---         {id = "c_fool"}
---     },
---     unlocked = true
--- }
+SMODS.Challenge {
+    loc_txt = "Isaactro Tester",
+    key = "isaactro_tester",
+    rules = {
+        custom = {},
+        modifiers = {
+            {id = 'hands', value = 10},
+            {id = 'discards', value = 10},
+            {id = 'joker_slots', value = 10},
+            {id = 'dollars', value = 10000}
+        }
+    },
+    vouchers = {
+        {id = "v_overstock_norm"},
+        {id = "v_overstock_plus"},
+        {id = "v_paint_brush"},
+        {id = "v_palette"},
+        {id = "v_reroll_surplus"},
+        {id = "v_reroll_glut"},
+        {id = "v_tarot_merchant"},
+        {id = "v_tarot_tycoon"},
+        {id = "v_telescope"}
+    },
+    jokers = { 
+        {id = "j_itro_holylight"}, 
+        {id = "j_blueprint", eternal = true},
+        {id = "j_bootstraps"},
+        {id = "j_cavendish"},
+        {id = "j_oops"},
+        -- {id = "j_hanging_chad"},
+    },
+    consumeables = {
+        {id = "c_magician"},
+        {id = "c_fool"}
+    },
+    unlocked = true
+}
 
