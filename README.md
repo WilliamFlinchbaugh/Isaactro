@@ -1,5 +1,5 @@
 # Isaactro
-Mod for Balatro that adds 50 The Binding of Isaac items as jokers (66 including all Birthright effects)
+Mod for Balatro that adds 50 The Binding of Isaac items as jokers (65 including all Birthright effects)
 
 ## Installation
 Follow the installation guide for [Steamodded](https://github.com/Steamodded) found here: [Guide](https://github.com/Steamodded/smods/wiki)
