@@ -1977,7 +1977,7 @@ SMODS.Joker {
         text = {
             "{C:green}#1# in #2#{} chance",
             "each played card to gain",
-            "a random {C:attention}enhancement{} or {C:attention}edition",
+            "random {C:attention}Enhancement{} or {C:attention}Edition",
             "when scored"
         }
     },
@@ -2000,7 +2000,7 @@ SMODS.Joker {
         if context.cardarea == G.play and context.individual and not context.blueprint then
             if pseudorandom('holylight') < 1 / 5 then
                 -- check for enhancement or edition
-                if psuedorandom('holylight') < card.ability.extra.enhancement_odds then
+                if pseudorandom('holylight') < card.ability.extra.enhancement_odds then
                     local cen_pool = {}
                     for k, v in pairs(G.P_CENTER_POOLS["Enhanced"]) do
                         if v.key ~= 'm_stone' and not v.overrides_base_rank then
