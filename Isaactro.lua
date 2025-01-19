@@ -1251,7 +1251,7 @@ SMODS.Joker {
     end,
 
     calc_dollar_bonus = function(self, card)
-        return card.ability.extra.money * (G.GAME.current_round.hands_played // card.ability.extra.hands)
+        return card.ability.extra.money * math.floor(G.GAME.current_round.hands_played / card.ability.extra.hands)
     end
 }
 
