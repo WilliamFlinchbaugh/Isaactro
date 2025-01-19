@@ -147,7 +147,8 @@ SMODS.Joker {
             "When {C:attention}Boss Blind{} is defeated,",
             "{C:attention}destroy{} all other Jokers and",
             "replace them with {C:attention}random Jokers{}",
-            "After triggered, this Joker becomes {C:attention}Eternal{}"
+            "After triggered, this Joker",
+            "becomes {C:attention}Eternal{}"
         }
     },
     config = { extra = {} },
@@ -168,7 +169,7 @@ SMODS.Joker {
     end,
 
     calculate = function(self, card, context)
-        if context.end_of_round and not context.repetition and context.game_over == false and G.GAME.blind.boss and #G.jokers.cards > 1 then
+        if context.end_of_round and not context.repetition and context.game_over == false and G.GAME.blind.boss and #G.jokers.cards > 1 and not context.blueprint then
             -- destroy all other jokers
             local num_destroyed = 0
             for _, other_joker in ipairs(G.jokers.cards) do
@@ -234,8 +235,15 @@ SMODS.Joker {
                 }))
             end
 
+            local chars = {'%', '#', '@', '&', '!', '$', '^', '*', '+', '~', '?', '(', ')', '[', ']', '{', '}', '<', '>', '|', '/', '\\', '`', '"', "'", ':', ';', ',', '.'}
+            -- create a string of size 3-8 with random these random characters
+            local random_string = ""
+            for i = 1, math.random(3, 8) do
+                random_string = random_string .. chars[math.random(1, #chars)]
+            end
+
             return {
-                message = "^$#%Corrupt!*@)&",
+                message = random_string,
                 colour = G.C.RED
             }
         end
@@ -248,7 +256,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'Box',
         text = {
-            "After {C:attention}#1#{} rounds, sell this card",
+            "After {C:attention}#1#{} round, sell this card",
             "to gain {C:attention}1{} random",
             "{C:planet}Planet{} and {C:tarot}Tarot{} card",
             "{C:inactive}(Currently {C:attention}#2#{C:inactive}/#1#)"
@@ -259,7 +267,7 @@ SMODS.Joker {
         x = 3,
         y = 31
     },
-    cost = 5,
+    cost = 4,
     rarity = 1,
     blueprint_compat = false,
     eternal_compat = false,
@@ -280,6 +288,10 @@ SMODS.Joker {
                 return {
                     message = localize('k_active_ex'),
                     colour = G.C.FILTER
+                }
+            else
+                return {
+                    message = tostring(card.ability.extra.rounds) .. "/" .. tostring(card.ability.extra.rounds_needed),
                 }
             end
 
@@ -370,7 +382,7 @@ SMODS.Joker {
         x = 4,
         y = 25
     },
-    cost = 3,
+    cost = 4,
     rarity = 1,
     blueprint_compat = true,
     eternal_compat = true,
@@ -445,7 +457,7 @@ SMODS.Joker {
         x = 6,
         y = 36
     },
-    cost = 3,
+    cost = 4,
     rarity = 1,
     blueprint_compat = false,
     eternal_compat = true,
@@ -513,7 +525,7 @@ SMODS.Joker {
         x = 2,
         y = 9
     },
-    cost = 4,
+    cost = 5,
     rarity = 1,
     blueprint_compat = true,
     eternal_compat = true,
@@ -583,7 +595,7 @@ SMODS.Joker {
             "{X:mult,C:white}X#1#{} to {X:mult,C:white}X#2#{}"
         }
     },
-    config = { extra = { Xmult_min = 0.5, Xmult_max = 1.5 } },
+    config = { extra = { Xmult_min = 0.8, Xmult_max = 1.7 } },
     pos = {
         x = 4,
         y = 35
@@ -786,7 +798,7 @@ SMODS.Joker {
                         end
                     )}))
                 end
-                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex'), colour = G.C.BLUE})
+                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = "Blessed!", colour = G.C.BLUE})
             end
         end
     end
@@ -1065,7 +1077,6 @@ SMODS.Joker {
     end
 }
 
-
 -- Quality 2 Jokers (12) (all uncommon or common)
 
 -- Guppy's Head (common)
@@ -1163,7 +1174,7 @@ SMODS.Joker {
                 card:remove()
                 card = nil
                 return {
-                    message = localize('k_eaten_ex'),
+                    message = localize('k_drank_ex'),
                     colour = G.C.RED
                 }
             end
@@ -1218,11 +1229,11 @@ SMODS.Joker {
     loc_txt = {
         name = 'Head of the Keeper',
         text = {
-            "Earn {C:money}$#1#{} per hand played",
-            "at the end of the round"
+            "Earn {C:money}$#1#{} for every {C:attention}#2#{} hands",
+            "played at the end of the round"
         }
     },
-    config = { extra = { money = 1 } },
+    config = { extra = { money = 3, hands = 2 } },
     pos = {
         x = 5,
         y = 50
@@ -1240,7 +1251,7 @@ SMODS.Joker {
     end,
 
     calc_dollar_bonus = function(self, card)
-        return card.ability.extra.money * G.GAME.current_round.hands_played
+        return card.ability.extra.money * (G.GAME.current_round.hands_played // card.ability.extra.hands)
     end
 }
 
@@ -1957,82 +1968,6 @@ SMODS.Joker {
     end
 }
 
--- Forget Me Now (rare)
-SMODS.Joker { 
-    -- After 4 rounds, sell for -1 ante
-    key = "forgetmenow",
-    loc_txt = {
-        name = 'Forget Me Now',
-        text = {
-            "After {C:attention}#1#{} rounds,",
-            "sell this {C:attention}Joker{} for",
-            "{C:attention}-#2#{} Ante",
-            "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
-        }
-    },
-    config = { extra = { rounds = 0, rounds_needed = 4, antes = 1 } },
-    pos = {
-        x = 4,
-        y = 2
-    },
-    cost = 6,
-    rarity = 3,
-    blueprint_compat = false,
-    eternal_compat = false,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.rounds_needed, card.ability.extra.antes, card.ability.extra.rounds }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition and card.ability.extra.rounds < card.ability.extra.rounds_needed then
-            card.ability.extra.rounds = card.ability.extra.rounds + 1
-            if card.ability.extra.rounds >= card.ability.extra.rounds_needed then
-                local eval = function(card) return not card.REMOVED end
-                juice_card_until(card, eval, true)
-                return {
-                    message = localize('k_active'),
-                    colour = G.C.FILTER
-                }
-            end
-
-        elseif context.selling_self and card.ability.extra.rounds >= card.ability.extra.rounds_needed and not context.blueprint then
-            G.GAME.round_resets.ante = G.GAME.round_resets.ante - card.ability.extra.antes
-            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_redeemed_ex')})
-            play_sound('holo1')
-        end
-    end
-}
-
--- Spoon Bender (rare)
-SMODS.Joker { 
-    -- Chips and Mult are balanced (plasma effect)
-    -- effect is handled in patch
-    key = "spoonbender",
-    loc_txt = {
-        name = 'Spoon Bender',
-        text = {
-            "Balances {C:chips}Chips{} and",
-            "{C:mult}Mult{} when calculating",
-            "score for played hand"
-        }
-    },
-    pos = {
-        x = 3,
-        y = 17
-    },
-    cost = 7,
-    rarity = 3,
-    blueprint_compat = false,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers'
-}
-
 -- Holy Light (uncommon)
 SMODS.Joker {
     -- 1 in 4 chance for each played card to gain random enhancement when scored
@@ -2255,6 +2190,82 @@ SMODS.Joker {
             }
         end
     end
+}
+
+-- Forget Me Now (rare)
+SMODS.Joker { 
+    -- After 4 rounds, sell for -1 ante
+    key = "forgetmenow",
+    loc_txt = {
+        name = 'Forget Me Now',
+        text = {
+            "After {C:attention}#1#{} rounds,",
+            "sell this {C:attention}Joker{} for",
+            "{C:attention}-#2#{} Ante",
+            "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
+        }
+    },
+    config = { extra = { rounds = 0, rounds_needed = 4, antes = 1 } },
+    pos = {
+        x = 4,
+        y = 2
+    },
+    cost = 6,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = false,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.rounds_needed, card.ability.extra.antes, card.ability.extra.rounds }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition and card.ability.extra.rounds < card.ability.extra.rounds_needed then
+            card.ability.extra.rounds = card.ability.extra.rounds + 1
+            if card.ability.extra.rounds >= card.ability.extra.rounds_needed then
+                local eval = function(card) return not card.REMOVED end
+                juice_card_until(card, eval, true)
+                return {
+                    message = localize('k_active'),
+                    colour = G.C.FILTER
+                }
+            end
+
+        elseif context.selling_self and card.ability.extra.rounds >= card.ability.extra.rounds_needed and not context.blueprint then
+            G.GAME.round_resets.ante = G.GAME.round_resets.ante - card.ability.extra.antes
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_redeemed_ex')})
+            play_sound('holo1')
+        end
+    end
+}
+
+-- Spoon Bender (rare)
+SMODS.Joker { 
+    -- Chips and Mult are balanced (plasma effect)
+    -- effect is handled in patch
+    key = "spoonbender",
+    loc_txt = {
+        name = 'Spoon Bender',
+        text = {
+            "Balances {C:chips}Chips{} and",
+            "{C:mult}Mult{} when calculating",
+            "score for played hand"
+        }
+    },
+    pos = {
+        x = 3,
+        y = 17
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers'
 }
 
 -- Mutant Spider (rare)
