@@ -129,22 +129,25 @@ local function all_hands_meet_level(level)
     return true
 end
 
+local p_card_editions = {
+    "e_polychrome",
+    "e_holo",
+    "e_foil"
+}
+
 
 -- QUALITY 0 JOKERS (6) (all common)
 
--- Missing No.
+-- Missing No. (common)
 SMODS.Joker {
     key = "missingno",
     loc_txt = {
         name = 'Missing No.',
         text = {
             "When {C:attention}Boss Blind{} is defeated,",
-            "{C:attention}destroy{} all other Jokers",
-            "and replace them with",
-            "{C:attention}random Jokers{}",
-            "After triggered once, this Joker",
-            "becomes {C:attention}Eternal{}",
-            "{C:inactive}(Eternal Jokers cannot be sold or destroyed)"
+            "{C:attention}destroy{} all other Jokers and",
+            "replace them with {C:attention}random Jokers{}",
+            "After triggered, this Joker becomes {C:attention}Eternal{}"
         }
     },
     config = { extra = {} },
@@ -239,7 +242,7 @@ SMODS.Joker {
     end
 }
 
--- Box
+-- Box (common)
 SMODS.Joker { 
     key = "box",
     loc_txt = {
@@ -314,7 +317,7 @@ SMODS.Joker {
     end
 }
 
--- Pageant Boy
+-- Pageant Boy (common)
 SMODS.Joker {
     key = "pageantboy",
     loc_txt = {
@@ -351,7 +354,7 @@ SMODS.Joker {
     end
 }
 
--- Dead Bird
+-- Dead Bird (common)
 SMODS.Joker {
     key = "deadbird",
     loc_txt = {
@@ -389,7 +392,7 @@ SMODS.Joker {
     end
 }
 
--- Poop
+-- Poop (common)
 SMODS.Joker {
     key = "poop",
     loc_txt = {
@@ -427,7 +430,7 @@ SMODS.Joker {
     end
 }
 
--- Little Baggy
+-- Little Baggy (common)
 SMODS.Joker {
     key = "littlebaggy",
     loc_txt = {
@@ -493,73 +496,6 @@ SMODS.Joker {
 }
 
 -- Quality 1 Jokers (10) (all common or uncommon)
-
--- The Bible (uncommon)
-SMODS.Joker {
-    -- if first played hand each round contains only one card, each card held in hand permanently gains 10 chips
-    key = "bible",
-    loc_txt = {
-        name = 'The Bible',
-        text = {
-            "If {C:attention}First Hand{} of round",
-            "has only {C:attention}1{} card,",
-            "each card held permanently",
-            "gains {C:chips}+#1#{} Chips"
-        }
-    },
-    config = { extra = { chip_mod = 8, used = false } },
-    pos = {
-        x = 6,
-        y = 5
-    },
-    cost = 5,
-    rarity = 2,
-    blueprint_compat = true,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.chip_mod }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.setting_blind and not context.blueprint then
-            card.ability.extra.used = false
-            local eval = function() return not card.ability.extra.used end
-            juice_card_until(card, eval, true)
-        end
-
-        if context.cardarea == G.hand and context.other_card and context.individual and G.GAME.current_round.hands_played == 0 then
-            card.ability.extra.used = true
-            if #context.full_hand == 1 then
-                if context.blueprint then
-                    G.E_MANAGER:add_event(Event({
-                        trigger = 'before',
-                        delay = 0.0,
-                        func = (function()
-                            context.blueprint_card:juice_up(0.3, 0.4)
-                            context.other_card.ability.perma_bonus = context.other_card.ability.perma_bonus + card.ability.extra.chip_mod
-                            return true
-                        end
-                    )}))
-                else
-                    G.E_MANAGER:add_event(Event({
-                        trigger = 'before',
-                        delay = 0.0,
-                        func = (function()
-                            card:juice_up(0.3, 0.4)
-                            context.other_card.ability.perma_bonus = context.other_card.ability.perma_bonus + card.ability.extra.chip_mod
-                            return true
-                        end
-                    )}))
-                end
-                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex'), colour = G.C.BLUE})
-            end
-        end
-    end
-}
 
 -- Wooden Nickel (common)
 SMODS.Joker {
@@ -635,7 +571,228 @@ SMODS.Joker {
     end
 }
 
--- Bucket of Lard (uncommon)
+-- Experimental Treatment (common)
+SMODS.Joker {
+    -- Gives chips between -20 and +20
+	-- Gives multiplier between x0.5 and x1.5
+    key = "experimentaltreatment",
+    loc_txt = {
+        name = 'Experimental Treatment',
+        text = {
+            "Random {C:red}Multiplier{} from",
+            "{X:mult,C:white}X#1#{} to {X:mult,C:white}X#2#{}"
+        }
+    },
+    config = { extra = { Xmult_min = 0.5, Xmult_max = 1.5 } },
+    pos = {
+        x = 4,
+        y = 35
+    },
+    cost = 4,
+    rarity = 1,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.Xmult_min, card.ability.extra.Xmult_max }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            local Xmult = card.ability.extra.Xmult_min + (card.ability.extra.Xmult_max - card.ability.extra.Xmult_min) * math.random()
+            return {
+                message = localize { type = 'variable', key = 'a_xmult', vars = { Xmult } },
+                Xmult_mod = Xmult
+            }
+        end
+    end
+}
+
+-- Breakfast (common)
+SMODS.Joker {
+    -- +20 chips, +20 mult, -4 chips and -4 mult for each round played
+    key = "breakfast",
+    loc_txt = {
+        name = 'Breakfast',
+        text = {
+            "{C:chips}+#1#{} Chips",
+            "{C:mult}+#2#{} Mult",
+            "{C:chips}-#3#{} Chips, {C:mult}-#4#{} Mult for",
+            "each hand played"
+        }
+    },
+    config = { extra = { mult = 10, chips = 50, mult_decrease = 1, chips_decrease = 5 } },
+    pos = {
+        x = 5,
+        y = 19
+    },
+    cost = 3,
+    rarity = 1,
+    blueprint_compat = true,
+    eternal_compat = false,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.chips_decrease, card.ability.extra.mult_decrease }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            return {
+                chips = card.ability.extra.chips,
+                mult = card.ability.extra.mult
+            }
+        end
+
+        if context.cardarea == G.jokers and context.after and not context.blueprint then
+            card.ability.extra.chips = card.ability.extra.chips - card.ability.extra.chips_decrease
+            card.ability.extra.mult = card.ability.extra.mult - card.ability.extra.mult_decrease
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = tostring(-card.ability.extra.chips_decrease), colour = G.C.CHIPS})
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = tostring(-card.ability.extra.mult_decrease) .. " Mult", colour = G.C.MULT})
+            if card.ability.extra.chips <= 0 or card.ability.extra.mult <= 0 then
+                G.jokers:remove_card(card)
+                card:remove()
+                card = nil
+                return {
+                    message = localize('k_eaten_ex'),
+                    colour = G.C.RED
+                }
+            end
+        end
+    end
+}
+
+-- Booster Pack  (common)
+SMODS.Joker { 
+    key = "boosterpack",
+    loc_txt = {
+        name = 'Booster Pack',
+        text = {
+            "After {C:attention}#1#{} rounds, sell this card",
+            "to gain {C:attention}#2#{} Negative {C:tarot}Tarot{} cards",
+            "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
+        }
+    },
+    config = { extra = { rounds_needed = 2, cards_given = 3, rounds = 0 } },
+    pos = {
+        x = 7,
+        y = 64
+    },
+    cost = 6,
+    rarity = 1,
+    blueprint_compat = false,
+    eternal_compat = false,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.rounds_needed, card.ability.extra.cards_given, card.ability.extra.rounds }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition and card.ability.extra.rounds < card.ability.extra.rounds_needed then
+            card.ability.extra.rounds = card.ability.extra.rounds + 1
+            if card.ability.extra.rounds >= card.ability.extra.rounds_needed then
+                local eval = function(card) return not card.REMOVED end
+                juice_card_until(card, eval, true)
+                return {
+                    message = localize('k_active_ex'),
+                    colour = G.C.FILTER
+                }
+            end
+
+        elseif context.selling_self and card.ability.extra.rounds >= card.ability.extra.rounds_needed then
+            for i = 1, card.ability.extra.cards_given do
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'before',
+                    delay = 0.0,
+                    func = (function()
+                            local card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, nil, 'box')
+                            card:set_edition('e_negative')
+                            card:add_to_deck()
+                            G.consumeables:emplace(card)
+                        return true
+                    end)}))
+            end
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_plus_tarot'), colour = G.C.SECONDARY_SET.Spectral})
+        end
+    end
+}
+
+-- The Bible (uncommon)
+SMODS.Joker {
+    -- if first played hand each round contains only one card, each card held in hand permanently gains 10 chips
+    key = "bible",
+    loc_txt = {
+        name = 'The Bible',
+        text = {
+            "If {C:attention}First Hand{} of round",
+            "has only {C:attention}1{} card,",
+            "each card held permanently",
+            "gains {C:chips}+#1#{} Chips"
+        }
+    },
+    config = { extra = { chip_mod = 8, used = false } },
+    pos = {
+        x = 6,
+        y = 5
+    },
+    cost = 6,
+    rarity = 2,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.chip_mod }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.setting_blind and not context.blueprint then
+            card.ability.extra.used = false
+            local eval = function() return not card.ability.extra.used end
+            juice_card_until(card, eval, true)
+        end
+
+        if context.cardarea == G.hand and context.other_card and context.individual and G.GAME.current_round.hands_played == 0 then
+            card.ability.extra.used = true
+            if #context.full_hand == 1 then
+                if context.blueprint then
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'before',
+                        delay = 0.0,
+                        func = (function()
+                            context.blueprint_card:juice_up(0.3, 0.4)
+                            context.other_card.ability.perma_bonus = context.other_card.ability.perma_bonus + card.ability.extra.chip_mod
+                            return true
+                        end
+                    )}))
+                else
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'before',
+                        delay = 0.0,
+                        func = (function()
+                            card:juice_up(0.3, 0.4)
+                            context.other_card.ability.perma_bonus = context.other_card.ability.perma_bonus + card.ability.extra.chip_mod
+                            return true
+                        end
+                    )}))
+                end
+                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex'), colour = G.C.BLUE})
+            end
+        end
+    end
+}
+
+-- Bucket of Lard (common)
 SMODS.Joker {
     key = "bucketoflard",
     loc_txt = {
@@ -652,7 +809,7 @@ SMODS.Joker {
         y = 26
     },
     cost = 5,
-    rarity = 2,
+    rarity = 1,
     blueprint_compat = true,
     eternal_compat = true,
     unlocked = true,
@@ -732,7 +889,7 @@ SMODS.Joker {
         x = 2,
         y = 22
     },
-    cost = 5,
+    cost = 7,
     rarity = 2,
     blueprint_compat = true,
     eternal_compat = true,
@@ -825,7 +982,7 @@ SMODS.Joker {
         x = 3,
         y = 45
     },
-    cost = 5,
+    cost = 6,
     rarity = 2,
     blueprint_compat = true,
     eternal_compat = true,
@@ -867,64 +1024,6 @@ SMODS.Joker {
     end
 }
 
--- Booster Pack  (uncommon)
-SMODS.Joker { 
-    key = "boosterpack",
-    loc_txt = {
-        name = 'Booster Pack',
-        text = {
-            "After {C:attention}#1#{} rounds, sell this card",
-            "to gain {C:attention}#2#{} Negative {C:tarot}Tarot{} cards",
-            "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
-        }
-    },
-    config = { extra = { rounds_needed = 2, cards_given = 3, rounds = 0 } },
-    pos = {
-        x = 7,
-        y = 64
-    },
-    cost = 4,
-    rarity = 1,
-    blueprint_compat = false,
-    eternal_compat = false,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.rounds_needed, card.ability.extra.cards_given, card.ability.extra.rounds }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition and card.ability.extra.rounds < card.ability.extra.rounds_needed then
-            card.ability.extra.rounds = card.ability.extra.rounds + 1
-            if card.ability.extra.rounds >= card.ability.extra.rounds_needed then
-                local eval = function(card) return not card.REMOVED end
-                juice_card_until(card, eval, true)
-                return {
-                    message = localize('k_active_ex'),
-                    colour = G.C.FILTER
-                }
-            end
-
-        elseif context.selling_self and card.ability.extra.rounds >= card.ability.extra.rounds_needed then
-            for i = 1, card.ability.extra.cards_given do
-                G.E_MANAGER:add_event(Event({
-                    trigger = 'before',
-                    delay = 0.0,
-                    func = (function()
-                            local card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, nil, 'box')
-                            card:set_edition('e_negative')
-                            card:add_to_deck()
-                            G.consumeables:emplace(card)
-                        return true
-                    end)}))
-            end
-            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_plus_tarot'), colour = G.C.SECONDARY_SET.Spectral})
-        end
-    end
-}
-
 -- Guppy's Collar (uncommon)
 SMODS.Joker {
     key = "guppyscollar",
@@ -941,7 +1040,7 @@ SMODS.Joker {
         x = 7,
         y = 32
     },
-    cost = 5,
+    cost = 8,
     rarity = 2,
     blueprint_compat = false,
     eternal_compat = true,
@@ -966,101 +1065,6 @@ SMODS.Joker {
     end
 }
 
--- Experimental Treatment (common)
-SMODS.Joker {
-    -- Gives chips between -20 and +20
-	-- Gives multiplier between x0.5 and x1.5
-    key = "experimentaltreatment",
-    loc_txt = {
-        name = 'Experimental Treatment',
-        text = {
-            "Random {C:red}Multiplier{} from",
-            "{X:mult,C:white}X#1#{} to {X:mult,C:white}X#2#{}"
-        }
-    },
-    config = { extra = { Xmult_min = 0.5, Xmult_max = 1.5 } },
-    pos = {
-        x = 4,
-        y = 35
-    },
-    cost = 3,
-    rarity = 1,
-    blueprint_compat = true,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.Xmult_min, card.ability.extra.Xmult_max }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.joker_main then
-            local Xmult = card.ability.extra.Xmult_min + (card.ability.extra.Xmult_max - card.ability.extra.Xmult_min) * math.random()
-            return {
-                message = localize { type = 'variable', key = 'a_xmult', vars = { Xmult } },
-                Xmult_mod = Xmult
-            }
-        end
-    end
-}
-
--- Breakfast (common)
-SMODS.Joker {
-    -- +20 chips, +20 mult, -4 chips and -4 mult for each round played
-    key = "breakfast",
-    loc_txt = {
-        name = 'Breakfast',
-        text = {
-            "{C:chips}+#1#{} Chips",
-            "{C:mult}+#2#{} Mult",
-            "{C:chips}-#3#{} Chips, {C:mult}-#4#{} Mult for",
-            "each hand played"
-        }
-    },
-    config = { extra = { mult = 10, chips = 50, mult_decrease = 1, chips_decrease = 5 } },
-    pos = {
-        x = 5,
-        y = 19
-    },
-    cost = 3,
-    rarity = 1,
-    blueprint_compat = true,
-    eternal_compat = false,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.chips_decrease, card.ability.extra.mult_decrease }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                chips = card.ability.extra.chips,
-                mult = card.ability.extra.mult
-            }
-        end
-
-        if context.cardarea == G.jokers and context.after and not context.blueprint then
-            card.ability.extra.chips = card.ability.extra.chips - card.ability.extra.chips_decrease
-            card.ability.extra.mult = card.ability.extra.mult - card.ability.extra.mult_decrease
-            card_eval_status_text(card, 'extra', nil, nil, nil, {message = tostring(-card.ability.extra.chips_decrease), colour = G.C.CHIPS})
-            card_eval_status_text(card, 'extra', nil, nil, nil, {message = tostring(-card.ability.extra.mult_decrease) .. " Mult", colour = G.C.MULT})
-            if card.ability.extra.chips <= 0 or card.ability.extra.mult <= 0 then
-                G.jokers:remove_card(card)
-                card:remove()
-                card = nil
-                return {
-                    message = localize('k_eaten_ex'),
-                    colour = G.C.RED
-                }
-            end
-        end
-    end
-}
 
 -- Quality 2 Jokers (12) (all uncommon or common)
 
@@ -1111,6 +1115,132 @@ SMODS.Joker {
                 colour = G.C.BLUE
             }
         end
+    end
+}
+
+-- Jesus Juice (common)
+SMODS.Joker {
+    -- X2 Mult, loses X0.05 Mult for each hand played
+    key = "jesusjuice",
+    loc_txt = {
+        name = 'Jesus Juice',
+        text = {
+            "{X:mult,C:white}X#1#{} Mult",
+            "Loses {X:mult,C:white}X#2#{} Mult for",
+            "each hand played"
+        }
+    },
+    config = { extra = { xmult = 2, xmult_mod = 0.05 } },
+    pos = {
+        x = 2,
+        y = 31
+    },
+    cost = 4,
+    rarity = 1,
+    blueprint_compat = true,
+    eternal_compat = false,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.xmult, card.ability.extra.xmult_mod }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            return {
+                Xmult_mod = card.ability.extra.xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
+            }
+        end
+
+        if context.cardarea == G.jokers and context.after and not context.blueprint then
+            card.ability.extra.xmult = card.ability.extra.xmult - card.ability.extra.xmult_mod
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = "-X" .. tostring(card.ability.extra.xmult_mod) .. " Mult", colour = G.C.MULT})
+            if card.ability.extra.xmult <= 0 then
+                G.jokers:remove_card(card)
+                card:remove()
+                card = nil
+                return {
+                    message = localize('k_eaten_ex'),
+                    colour = G.C.RED
+                }
+            end
+        end
+    end
+}
+
+-- Cain's Other Eye (common)
+SMODS.Joker {
+    -- 1 in 4 chance to give X2 Mult
+    key = "cainsothereye",
+    loc_txt = {
+        name = "Cain's Other Eye",
+        text = {
+            "{C:green}#1# in #2#{} chance to give",
+            "{X:mult,C:white}X#3#{} Mult"
+        }
+    },
+    config = { extra = { odds = 4, Xmult = 4 } },
+    pos = {
+        x = 5,
+        y = 41
+    },
+    cost = 5,
+    rarity = 1,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds, card.ability.extra.Xmult }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.joker_main then
+            if pseudorandom('cainsothereye') < 1 / card.ability.extra.odds then
+                return {
+                    Xmult_mod = card.ability.extra.Xmult,
+                    message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
+                }
+            end
+        end
+    end
+}
+
+-- Head of the Keeper (common)
+SMODS.Joker {
+    -- 1$ for each hand played at the end of the round
+    key = "headofthekeeper",
+    loc_txt = {
+        name = 'Head of the Keeper',
+        text = {
+            "Earn {C:money}$#1#{} per hand played",
+            "at the end of the round"
+        }
+    },
+    config = { extra = { money = 1 } },
+    pos = {
+        x = 5,
+        y = 50
+    },
+    cost = 5,
+    rarity = 1,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.money }}
+    end,
+
+    calc_dollar_bonus = function(self, card)
+        return card.ability.extra.money * G.GAME.current_round.hands_played
     end
 }
 
@@ -1587,59 +1717,6 @@ SMODS.Joker {
     end
 }
 
--- Jesus Juice (common)
-SMODS.Joker {
-    -- X2 Mult, loses X0.05 Mult for each hand played
-    key = "jesusjuice",
-    loc_txt = {
-        name = 'Jesus Juice',
-        text = {
-            "{X:mult,C:white}X#1#{} Mult",
-            "Loses {X:mult,C:white}X#2#{} Mult for",
-            "each hand played"
-        }
-    },
-    config = { extra = { xmult = 2, xmult_mod = 0.05 } },
-    pos = {
-        x = 2,
-        y = 31
-    },
-    cost = 4,
-    rarity = 1,
-    blueprint_compat = true,
-    eternal_compat = false,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.xmult, card.ability.extra.xmult_mod }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                Xmult_mod = card.ability.extra.xmult,
-                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.xmult} }
-            }
-        end
-
-        if context.cardarea == G.jokers and context.after and not context.blueprint then
-            card.ability.extra.xmult = card.ability.extra.xmult - card.ability.extra.xmult_mod
-            card_eval_status_text(card, 'extra', nil, nil, nil, {message = "-X" .. tostring(card.ability.extra.xmult_mod) .. " Mult", colour = G.C.MULT})
-            if card.ability.extra.xmult <= 0 then
-                G.jokers:remove_card(card)
-                card:remove()
-                card = nil
-                return {
-                    message = localize('k_eaten_ex'),
-                    colour = G.C.RED
-                }
-            end
-        end
-    end
-}
-
 -- Starter Deck (uncommon)
 SMODS.Joker {
     -- +1 consumable slot
@@ -1721,156 +1798,8 @@ SMODS.Joker {
     end
 }
 
--- Cain's Other Eye (common)
-SMODS.Joker {
-    -- 1 in 4 chance to give X2 Mult
-    key = "cainsothereye",
-    loc_txt = {
-        name = "Cain's Other Eye",
-        text = {
-            "{C:green}#1# in #2#{} chance to give",
-            "{X:mult,C:white}X#3#{} Mult"
-        }
-    },
-    config = { extra = { odds = 4, Xmult = 2 } },
-    pos = {
-        x = 5,
-        y = 41
-    },
-    cost = 4,
-    rarity = 1,
-    blueprint_compat = true,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds, card.ability.extra.Xmult }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.joker_main then
-            if pseudorandom('cainsothereye') < 1 / card.ability.extra.odds then
-                return {
-                    Xmult_mod = card.ability.extra.Xmult,
-                    message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
-                }
-            end
-        end
-    end
-}
-
--- Head of the Keeper (common)
-SMODS.Joker {
-    -- 1$ for each hand played at the end of the round
-    key = "headofthekeeper",
-    loc_txt = {
-        name = 'Head of the Keeper',
-        text = {
-            "Earn {C:money}$#1#{} per hand played",
-            "at the end of the round"
-        }
-    },
-    config = { extra = { money = 1 } },
-    pos = {
-        x = 5,
-        y = 50
-    },
-    cost = 4,
-    rarity = 1,
-    blueprint_compat = false,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.money }}
-    end,
-
-    calc_dollar_bonus = function(self, card)
-        return card.ability.extra.money * G.GAME.current_round.hands_played
-    end
-}
 
 -- Quality 3 Jokers (15) (all uncommon or rare)
-
--- Forget Me Now (rare)
-SMODS.Joker { 
-    -- After 4 rounds, sell for -1 ante
-    key = "forgetmenow",
-    loc_txt = {
-        name = 'Forget Me Now',
-        text = {
-            "After {C:attention}#1#{} rounds,",
-            "sell this {C:attention}Joker{} for",
-            "{C:attention}-#2#{} Ante",
-            "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
-        }
-    },
-    config = { extra = { rounds = 0, rounds_needed = 4, antes = 1 } },
-    pos = {
-        x = 4,
-        y = 2
-    },
-    cost = 6,
-    rarity = 3,
-    blueprint_compat = false,
-    eternal_compat = false,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.rounds_needed, card.ability.extra.antes, card.ability.extra.rounds }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition and card.ability.extra.rounds < card.ability.extra.rounds_needed then
-            card.ability.extra.rounds = card.ability.extra.rounds + 1
-            if card.ability.extra.rounds >= card.ability.extra.rounds_needed then
-                local eval = function(card) return not card.REMOVED end
-                juice_card_until(card, eval, true)
-                return {
-                    message = localize('k_active'),
-                    colour = G.C.FILTER
-                }
-            end
-
-        elseif context.selling_self and card.ability.extra.rounds >= card.ability.extra.rounds_needed and not context.blueprint then
-            G.GAME.round_resets.ante = G.GAME.round_resets.ante - card.ability.extra.antes
-            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_redeemed_ex')})
-            play_sound('holo1')
-        end
-    end
-}
-
--- Spoon Bender (rare)
-SMODS.Joker { 
-    -- Chips and Mult are balanced (plasma effect)
-    -- effect is handled in patch
-    key = "spoonbender",
-    loc_txt = {
-        name = 'Spoon Bender',
-        text = {
-            "Balances {C:chips}Chips{} and",
-            "{C:mult}Mult{} when calculating",
-            "score for played hand"
-        }
-    },
-    pos = {
-        x = 3,
-        y = 17
-    },
-    cost = 7,
-    rarity = 3,
-    blueprint_compat = false,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers'
-}
 
 --The Inner Eye (uncommon)
 SMODS.Joker { 
@@ -2028,6 +1957,306 @@ SMODS.Joker {
     end
 }
 
+-- Forget Me Now (rare)
+SMODS.Joker { 
+    -- After 4 rounds, sell for -1 ante
+    key = "forgetmenow",
+    loc_txt = {
+        name = 'Forget Me Now',
+        text = {
+            "After {C:attention}#1#{} rounds,",
+            "sell this {C:attention}Joker{} for",
+            "{C:attention}-#2#{} Ante",
+            "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
+        }
+    },
+    config = { extra = { rounds = 0, rounds_needed = 4, antes = 1 } },
+    pos = {
+        x = 4,
+        y = 2
+    },
+    cost = 6,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = false,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.rounds_needed, card.ability.extra.antes, card.ability.extra.rounds }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition and card.ability.extra.rounds < card.ability.extra.rounds_needed then
+            card.ability.extra.rounds = card.ability.extra.rounds + 1
+            if card.ability.extra.rounds >= card.ability.extra.rounds_needed then
+                local eval = function(card) return not card.REMOVED end
+                juice_card_until(card, eval, true)
+                return {
+                    message = localize('k_active'),
+                    colour = G.C.FILTER
+                }
+            end
+
+        elseif context.selling_self and card.ability.extra.rounds >= card.ability.extra.rounds_needed and not context.blueprint then
+            G.GAME.round_resets.ante = G.GAME.round_resets.ante - card.ability.extra.antes
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_redeemed_ex')})
+            play_sound('holo1')
+        end
+    end
+}
+
+-- Spoon Bender (rare)
+SMODS.Joker { 
+    -- Chips and Mult are balanced (plasma effect)
+    -- effect is handled in patch
+    key = "spoonbender",
+    loc_txt = {
+        name = 'Spoon Bender',
+        text = {
+            "Balances {C:chips}Chips{} and",
+            "{C:mult}Mult{} when calculating",
+            "score for played hand"
+        }
+    },
+    pos = {
+        x = 3,
+        y = 17
+    },
+    cost = 7,
+    rarity = 3,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers'
+}
+
+-- Holy Light (uncommon)
+SMODS.Joker {
+    -- 1 in 4 chance for each played card to gain random enhancement when scored
+    key = "holylight",
+    loc_txt = {
+        name = "Holy Light",
+        text = {
+            "{C:green}#1# in #2#{} chance",
+            "each played card to gain",
+            "a random {C:attention}enhancement{} or {C:attention}edition",
+            "when scored"
+        }
+    },
+    config = { extra = { odds = 4, enhancement_odds = 0.7 } },
+    pos = {
+        x = 9,
+        y = 45
+    },
+    cost = 8,
+    rarity = 2,
+    blueprint_compat = false,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+    loc_vars = function(self, info_queue, card)
+        return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds }}
+    end,
+    calculate = function(self, card, context)
+        if context.cardarea == G.play and context.individual and not context.blueprint then
+            if pseudorandom('holylight') < 1 / 5 then
+                -- check for enhancement or edition
+                if psuedorandom('holylight') < card.ability.extra.enhancement_odds then
+                    local cen_pool = {}
+                    for k, v in pairs(G.P_CENTER_POOLS["Enhanced"]) do
+                        if v.key ~= 'm_stone' and not v.overrides_base_rank then
+                            cen_pool[#cen_pool + 1] = v
+                        end
+                    end
+                    local enhancement = pseudorandom_element(cen_pool, pseudoseed('holylight'))
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            card:juice_up(0.3, 0.4)
+                            context.other_card:set_ability(enhancement, nil, true)
+                            context.other_card:juice_up(0.3, 0.4)
+                            return true
+                        end
+                    })) 
+                else
+                    local edition = pseudorandom_element(p_card_editions, pseudoseed('holylight'))
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            card:juice_up(0.3, 0.4)
+                            context.other_card:set_edition(edition)
+                            context.other_card:juice_up(0.3, 0.4)
+                            return true
+                        end
+                })) 
+                end
+
+
+                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            end
+        end
+    end
+}
+
+-- Dead Eye (uncommon)
+SMODS.Joker {
+    -- This Joker gains x0.1 mult for each consecutive same poker hand played
+    key = "deadeye",
+    loc_txt = {
+        name = 'Dead Eye',
+        text = {
+            "This {C:attention}Joker{} gains",
+            "{X:mult,C:white}X#1#{} Mult per",
+            "consecutive {C:attention}same{}",
+            "{C:attention}poker hand{} played",
+            "{C:inactive}(Last played {C:attention}#2#{C:inactive})",
+            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
+        }
+    },
+    config = { extra = { Xmult_mod = 0.15, Xmult = 1, Xmult_init = 1, last_played = "None" } },
+    pos = {
+        x = 8,
+        y = 45
+    },
+    cost = 7,
+    rarity = 2,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+
+        return { vars = { card.ability.extra.Xmult_mod, card.ability.extra.last_played, card.ability.extra.Xmult }}
+    end,
+
+    calculate = function(self, card, context)
+        -- apply xmult
+        if context.joker_main and card.ability.extra.Xmult > 1 then
+            return {
+                Xmult_mod = card.ability.extra.Xmult,
+                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
+            }
+        end
+
+        -- before, check if the hand is last played hand
+        if context.cardarea == G.jokers and context.before and context.scoring_name and not context.blueprint then
+            -- if first time, set last played hand to current hand and upgrade
+            if card.ability.extra.last_played == "None" then
+                card.ability.extra.last_played = context.scoring_name
+                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            
+
+            -- if consecutive, upgrade
+            elseif context.scoring_name == card.ability.extra.last_played then
+                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            
+            -- if not consecutive, reset
+            else
+                card.ability.extra.Xmult = card.ability.extra.Xmult_init
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_reset')})
+                card.ability.extra.last_played = context.scoring_name
+            end
+        end
+    end
+}
+
+-- Jacob's Ladder (uncommon)
+SMODS.Joker {
+    -- Each played Jack gives +20 Mult when scored
+    key = "jacobsladder",
+    loc_txt = {
+        name = "Jacob's Ladder",
+        text = {
+            "Each {C:attention}Jack{} gives",
+            "{C:mult}+#1#{} Mult when scored"
+        }
+    },
+    config = { extra = { mult = 24 } },
+    pos = {
+        x = 9,
+        y = 54
+    },
+    cost = 5,
+    rarity = 2,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.mult }}
+    end,
+
+    calculate = function(self, card, context)
+        if context.individual and context.cardarea == G.play and context.other_card:get_id() == 11 then
+            return {
+                mult = card.ability.extra.mult,
+                card = card
+            }
+        end
+    end
+}
+
+-- Keeper's Sack (uncommon)
+SMODS.Joker {
+    -- This joker gains Mult equal to dollars spent in shop (excluding rerolls)
+    key = "keeperssack",
+    loc_txt = {
+        name = "Keeper's Sack",
+        text = {
+            "This {C:attention}Joker{} gains",
+            "{C:mult}+#1#{} Mult for every",
+            "{C:money}$#2#{} you spend in Shop",
+            "{C:inactive}(Excluding rerolls)",
+            "{C:inactive}(Currently {C:money}$#3#{C:inactive} = {C:mult}+#4#{C:inactive} Mult)"
+        }
+    },
+    pos = {
+        x = 9,
+        y = 70
+    },
+    config = { extra = { mult_mod = 2, spending_increment = 6, money_spent = 0, mult = 0 } },
+    cost = 6,
+    rarity = 2,
+    blueprint_compat = true,
+    eternal_compat = true,
+    unlocked = true,
+    discovered = true,
+    atlas = 'IsaactroJokers',
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = { card.ability.extra.mult_mod, card.ability.extra.spending_increment, card.ability.extra.money_spent, card.ability.extra.mult }}
+    end,
+
+    calculate = function(self, card, context)
+        if (context.buying_card or context.open_booster) and not context.blueprint then
+            if self == context.card then
+                return
+            end
+            card.ability.extra.money_spent = card.ability.extra.money_spent + context.card.cost
+            local increments = math.floor(card.ability.extra.money_spent / card.ability.extra.spending_increment)
+            local new_mult = increments * card.ability.extra.mult_mod
+            if new_mult > card.ability.extra.mult then
+                card.ability.extra.mult = new_mult
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
+            end
+        end
+
+        if context.joker_main and card.ability.extra.mult > 0 then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+    end
+}
+
 -- Mutant Spider (rare)
 SMODS.Joker { 
     -- X4 mult if most played hand is at least level 8
@@ -2137,123 +2366,6 @@ SMODS.Joker {
     end
 }
 
--- Holy Light (uncommon)
-SMODS.Joker {
-    -- 1 in 4 chance for each played card to gain random enhancement when scored
-    key = "holylight",
-    loc_txt = {
-        name = "Holy Light",
-        text = {
-            "{C:green}#1# in #2#{} chance",
-            "per played card to gain",
-            "a {C:attention}random enhancement{} when scored"
-        }
-    },
-    config = { extra = { odds = 4 } },
-    pos = {
-        x = 9,
-        y = 45
-    },
-    cost = 5,
-    rarity = 2,
-    blueprint_compat = false,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-    loc_vars = function(self, info_queue, card)
-        return {vars = { G.GAME.probabilities.normal, card.ability.extra.odds }}
-    end,
-    calculate = function(self, card, context)
-        if context.cardarea == G.play and context.individual and not context.blueprint then
-            if pseudorandom('holylight') < 1 / 5 then
-                local cen_pool = {}
-                for k, v in pairs(G.P_CENTER_POOLS["Enhanced"]) do
-                    if v.key ~= 'm_stone' and not v.overrides_base_rank then
-                        cen_pool[#cen_pool + 1] = v
-                    end
-                end
-                local enhancement = pseudorandom_element(cen_pool, pseudoseed('holylight'))
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        card:juice_up(0.3, 0.4)
-                        context.other_card:set_ability(enhancement, nil, true)
-                        context.other_card:juice_up(0.3, 0.4)
-                        return true
-                    end
-                })) 
-                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
-            end
-        end
-    end
-}
-
--- Dead Eye (uncommon)
-SMODS.Joker {
-    -- This Joker gains x0.1 mult for each consecutive same poker hand played
-    key = "deadeye",
-    loc_txt = {
-        name = 'Dead Eye',
-        text = {
-            "This {C:attention}Joker{} gains",
-            "{X:mult,C:white}X#1#{} Mult per",
-            "consecutive {C:attention}same{}",
-            "{C:attention}poker hand{} played",
-            "{C:inactive}(Last played {C:attention}#2#{C:inactive})",
-            "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
-        }
-    },
-    config = { extra = { Xmult_mod = 0.1, Xmult = 1, Xmult_init = 1, last_played = "None" } },
-    pos = {
-        x = 8,
-        y = 45
-    },
-    cost = 6,
-    rarity = 2,
-    blueprint_compat = true,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-
-        return { vars = { card.ability.extra.Xmult_mod, card.ability.extra.last_played, card.ability.extra.Xmult }}
-    end,
-
-    calculate = function(self, card, context)
-        -- apply xmult
-        if context.joker_main and card.ability.extra.Xmult > 1 then
-            return {
-                Xmult_mod = card.ability.extra.Xmult,
-                message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
-            }
-        end
-
-        -- before, check if the hand is last played hand
-        if context.cardarea == G.jokers and context.before and context.scoring_name and not context.blueprint then
-            -- if first time, set last played hand to current hand and upgrade
-            if card.ability.extra.last_played == "None" then
-                card.ability.extra.last_played = context.scoring_name
-                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
-                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
-            
-
-            -- if consecutive, upgrade
-            elseif context.scoring_name == card.ability.extra.last_played then
-                card.ability.extra.Xmult = card.ability.extra.Xmult + card.ability.extra.Xmult_mod
-                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
-            
-            -- if not consecutive, reset
-            else
-                card.ability.extra.Xmult = card.ability.extra.Xmult_init
-                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_reset')})
-                card.ability.extra.last_played = context.scoring_name
-            end
-        end
-    end
-}
-
 -- The Mind (rare)
 SMODS.Joker {
     -- +2 hand size
@@ -2350,94 +2462,6 @@ SMODS.Joker {
     end,
     remove_from_deck = function(self, card, from_debuff)
         G.GAME.round_resets.hands = G.GAME.round_resets.hands - card.ability.extra.hands
-    end
-}
-
--- Jacob's Ladder (uncommon)
-SMODS.Joker {
-    -- Each played Jack gives +20 Mult when scored
-    key = "jacobsladder",
-    loc_txt = {
-        name = "Jacob's Ladder",
-        text = {
-            "Each {C:attention}Jack{} gives",
-            "{C:mult}+#1#{} Mult when scored"
-        }
-    },
-    config = { extra = { mult = 24 } },
-    pos = {
-        x = 9,
-        y = 54
-    },
-    cost = 5,
-    rarity = 2,
-    blueprint_compat = true,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.mult }}
-    end,
-
-    calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play and context.other_card:get_id() == 11 then
-            return {
-                mult = card.ability.extra.mult,
-                card = card
-            }
-        end
-    end
-}
-
--- Keeper's Sack (uncommon)
-SMODS.Joker {
-    -- This joker gains Mult equal to dollars spent in shop (excluding rerolls)
-    key = "keeperssack",
-    loc_txt = {
-        name = "Keeper's Sack",
-        text = {
-            "This {C:attention}Joker{} gains",
-            "{C:mult}+#1#{} Mult for every",
-            "{C:money}$#2#{} you spend in Shop",
-            "{C:inactive}(Excluding rerolls)",
-            "{C:inactive}(Currently {C:money}$#3#{C:inactive} = {C:mult}+#4#{C:inactive} Mult)"
-        }
-    },
-    pos = {
-        x = 9,
-        y = 70
-    },
-    config = { extra = { mult_mod = 2, spending_increment = 6, money_spent = 0, mult = 0 } },
-    cost = 6,
-    rarity = 2,
-    blueprint_compat = true,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
-    atlas = 'IsaactroJokers',
-
-    loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.mult_mod, card.ability.extra.spending_increment, card.ability.extra.money_spent, card.ability.extra.mult }}
-    end,
-
-    calculate = function(self, card, context)
-        if (context.buying_card or context.open_booster) and not context.blueprint then
-            card.ability.extra.money_spent = card.ability.extra.money_spent + context.card.cost
-            local increments = math.floor(card.ability.extra.money_spent / card.ability.extra.spending_increment)
-            local new_mult = increments * card.ability.extra.mult_mod
-            if new_mult > card.ability.extra.mult then
-                card.ability.extra.mult = new_mult
-                card_eval_status_text(card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
-            end
-        end
-
-        if context.joker_main and card.ability.extra.mult > 0 then
-            return {
-                mult = card.ability.extra.mult
-            }
-        end
     end
 }
 
@@ -3455,12 +3479,12 @@ SMODS.Joker {
             "{C:attention}Blind{} is selected"
         }
     },
-    config = { extra = { Xmult = 4, hands = 1, discards = 1 } },
+    config = { extra = { Xmult = 8, hands = 1, discards = 1 } },
     pos = {
         x = 0,
         y = 29
     },
-    cost = 7,
+    cost = 10,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3507,7 +3531,7 @@ SMODS.Joker {
         x = 5,
         y = 69
     },
-    config = { extra = { odds = 3 } },
+    config = { extra = { odds = 2 } },
     cost = 6,
     rarity = 3,
     blueprint_compat = false,
