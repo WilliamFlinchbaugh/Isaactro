@@ -3594,41 +3594,41 @@ SMODS.Joker {
 }
 
 -- Tester challenge to test jokers
-SMODS.Challenge {
-    loc_txt = "Isaactro Tester",
-    key = "isaactro_tester",
-    rules = {
-        custom = {},
-        modifiers = {
-            {id = 'hands', value = 10},
-            {id = 'discards', value = 10},
-            {id = 'joker_slots', value = 10},
-            {id = 'dollars', value = 10000}
-        }
-    },
-    vouchers = {
-        {id = "v_overstock_norm"},
-        {id = "v_overstock_plus"},
-        {id = "v_paint_brush"},
-        {id = "v_palette"},
-        {id = "v_reroll_surplus"},
-        {id = "v_reroll_glut"},
-        {id = "v_tarot_merchant"},
-        {id = "v_tarot_tycoon"},
-        {id = "v_telescope"}
-    },
-    jokers = { 
-        {id = "j_itro_holylight"}, 
-        {id = "j_blueprint", eternal = true},
-        {id = "j_bootstraps"},
-        {id = "j_cavendish"},
-        {id = "j_oops"},
-        -- {id = "j_hanging_chad"},
-    },
-    consumeables = {
-        {id = "c_magician"},
-        {id = "c_fool"}
-    },
-    unlocked = true
-}
+-- SMODS.Challenge {
+--     loc_txt = "Isaactro Tester",
+--     key = "isaactro_tester",
+--     rules = {
+--         custom = {},
+--         modifiers = {
+--             {id = 'hands', value = 10},
+--             {id = 'discards', value = 10},
+--             {id = 'joker_slots', value = 10},
+--             {id = 'dollars', value = 10000}
+--         }
+--     },
+--     vouchers = {
+--         {id = "v_overstock_norm"},
+--         {id = "v_overstock_plus"},
+--         {id = "v_paint_brush"},
+--         {id = "v_palette"},
+--         {id = "v_reroll_surplus"},
+--         {id = "v_reroll_glut"},
+--         {id = "v_tarot_merchant"},
+--         {id = "v_tarot_tycoon"},
+--         {id = "v_telescope"}
+--     },
+--     jokers = { 
+--         {id = "j_itro_holylight"}, 
+--         {id = "j_blueprint", eternal = true},
+--         {id = "j_bootstraps"},
+--         {id = "j_cavendish"},
+--         {id = "j_oops"},
+--         -- {id = "j_hanging_chad"},
+--     },
+--     consumeables = {
+--         {id = "c_magician"},
+--         {id = "c_fool"}
+--     },
+--     unlocked = true
+-- }
 
