@@ -120,13 +120,14 @@ local function all_unlocked_hands()
     return unlocked_hands
 end
 
-local function all_hands_meet_level(level)
+local function n_hands_meet_level(n, level)
+    local thunk = 0
     for _, v in ipairs(all_unlocked_hands()) do
-        if G.GAME.hands[v].visible and (G.GAME.hands[v].level or 1) < level then
-            return false
+        if G.GAME.hands[v].visible and (G.GAME.hands[v].level or 1) >= level then
+            thunk = thunk + 1
         end
     end
-    return true
+    return thunk >= n
 end
 
 local p_card_editions = {
@@ -592,7 +593,8 @@ SMODS.Joker {
         name = 'Experimental Treatment',
         text = {
             "Random {C:red}Multiplier{} from",
-            "{X:mult,C:white}X#1#{} to {X:mult,C:white}X#2#{}"
+            "{X:mult,C:white}X#1#{} to {X:mult,C:white}X#2#{}",
+            "{s:0.8}Resets after each hand played"
         }
     },
     config = { extra = { Xmult_min = 0.8, Xmult_max = 1.7 } },
@@ -888,8 +890,8 @@ SMODS.Joker {
         name = 'Cube of Meat',
         text = {
             "When {C:red}Cube of Meat{} is purchased,",
-            "this joker gains {X:mult,C:white}X#1#{} Mult and",
-            "destroys the other {C:red}Cube of Meat{}",
+            "{C:attention}destroy it{} and this",
+            "Joker gains {X:mult,C:white}X#1#{} Mult",
             "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult){}",
             "Gain a {C:attention}Cube of Meat Tag{}",
             "after {C:attention}#3# rerolls{}",
@@ -1044,7 +1046,7 @@ SMODS.Joker {
         text = {
             "{C:green}1 in #1#{} chance to",
             "prevent {C:attention}Death{}",
-            "{C:inactive}(These odds cannot be increased)"
+            "{s:0.8}These odds cannot be increased"
         }
     },
     config = { extra = { odds = 2 } },
@@ -1247,7 +1249,7 @@ SMODS.Joker {
     atlas = 'IsaactroJokers',
 
     loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.money }}
+        return {vars = { card.ability.extra.money, card.ability.extra.hands }}
     end,
 
     calc_dollar_bonus = function(self, card)
@@ -1267,12 +1269,12 @@ SMODS.Joker {
             "{C:attention}destroy all held Jokers{} or",
             "create {C:attention}copies of each Joker{}",
             "until all Joker slots full",
+            "{s:0.8}These odds cannot be increased",
             "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)",
-            "{C:inactive}(These odds cannot be increased)",
             "{C:inactive}(Copies are created from left to right)"
         }
     },
-    config = { extra = { rounds_needed = 2, odds = 1, rounds = 0 } },
+    config = { extra = { rounds_needed = 2, odds = 2, rounds = 0 } },
     pos = {
         x = 0,
         y = 10
@@ -1374,8 +1376,8 @@ SMODS.Joker {
             "to destroy up to {C:attention}#2#{} Jokers",
             "from {C:attention}left to right{} and replace with random",
             "{C:attention}Eternal {C:green}Uncommon{} or {C:red}Rare {C:attention}Jokers{}",
+            "{s:0.8}Eternal Jokers cannot be sold or destroyed",
             "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)",
-            "{C:inactive}({C:attention}Eternal{C:inactive} Jokers cannot be sold or destroyed)"
         }
     },
     config = { extra = { rounds_needed = 2, num_jokers = 2, rounds = 0 } },
@@ -1664,7 +1666,6 @@ SMODS.Joker {
         text = {
             "Creates a copy of the first",
             "{C:attention}Consumable{} used each round",
-            "{C:inactive}(Resets after {C:attention}Blind{C:inactive} is defeated)"
         }
     },
     pos = {
@@ -2043,7 +2044,7 @@ SMODS.Joker {
             "{X:mult,C:white}X#1#{} Mult per",
             "consecutive {C:attention}same{}",
             "{C:attention}poker hand{} played",
-            "{C:inactive}(Last played {C:attention}#2#{C:inactive})",
+            "{s:0.8}Last played #2#",
             "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
         }
     },
@@ -2146,7 +2147,7 @@ SMODS.Joker {
             "This {C:attention}Joker{} gains",
             "{C:mult}+#1#{} Mult for every",
             "{C:money}$#2#{} you spend in Shop",
-            "{C:inactive}(Excluding rerolls)",
+            "{s:0.8}Excludes rerolls",
             "{C:inactive}(Currently {C:money}$#3#{C:inactive} = {C:mult}+#4#{C:inactive} Mult)"
         }
     },
@@ -3232,7 +3233,7 @@ SMODS.Joker {
         name = 'The D6',
         text = {
             "{C:attention}Reroll prices{} don't increase",
-            "{C:inactive}(Minimum of {C:money}$1{C:inactive})"
+            "{s:0.8}Minimum of {s:0.8,C:money}$1"
         }
     },
     config = { extra = { init_reroll_price = 1 } },
@@ -3280,9 +3281,10 @@ SMODS.Joker {
         name = "Brimstone",
         text = {
             "If {C:attention}first hand{} of round",
-            "contains {C:attention}Five of a Kind{},",
-            "the {C:attention}first scoring{} card without",
-            "an edition becomes {C:attention}Polychrome{}"
+            "contains {C:attention}Five of a Kind{}",
+            "and {C:attention}no discards{} are used,",
+            "all scoring cards without edition",
+            "become {C:edition}Polychrome{}"
         }
     },
     config = { extra = { used = false } },
@@ -3308,12 +3310,11 @@ SMODS.Joker {
             juice_card_until(card, eval, true)
         end
 
-        if context.cardarea == G.jokers and G.GAME.current_round.hands_played == 0 and context.before then 
+        if (context.cardarea == G.jokers and G.GAME.current_round.hands_played == 0 and context.before) or context.discard then 
             card.ability.extra.used = true
         end
 
-        -- and #context.poker_hands["Five of a Kind"] == 5
-        if context.cardarea == G.jokers and context.before and G.GAME.current_round.hands_played == 0 and context.poker_hands["Five of a Kind"][1] and not context.blueprint then
+        if context.cardarea == G.jokers and context.before and G.GAME.current_round.hands_played == 0 and context.poker_hands["Five of a Kind"][1] and G.GAME.current_round.discards_used == 0 and not context.blueprint then
             -- find first scoring card without an edition
             for _, playing_card in ipairs(context.scoring_hand) do
                 if not playing_card.edition then
@@ -3326,7 +3327,6 @@ SMODS.Joker {
                         end
                     })) 
                     card_eval_status_text(playing_card, 'extra', nil, nil, nil, {message = localize('k_upgrade_ex')})
-                    return
                 end
             end
         end
@@ -3352,7 +3352,7 @@ SMODS.Joker {
         x = 2,
         y = 18
     },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3400,7 +3400,7 @@ SMODS.Joker {
         x = 9,
         y = 29
     },
-    cost = 7,
+    cost = 10,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3437,22 +3437,24 @@ SMODS.Joker {
 
 -- Godhead (rare)
 SMODS.Joker {
-    -- X6 mult if all unlocked hands are at least level 4
+    -- X5 mult if at least 3 unlocked hands are at least the level of the current ante
     key = "godhead",
     loc_txt = {
         name = "Godhead",
         text = {
-            "{X:mult,C:white}X#1#{} Mult if all",
-            "unlocked hands are",
-            "at least {C:attention}Level #2#{}"
+            "{X:mult,C:white}X#1#{} Mult if at least",
+            "{C:attention}#2#{} unlocked hands are",
+            "at least the {C:attention}level{} of the",
+            "{C:attention}current ante",
+            "{C:inactive}(Currently requires {C:attention}Level #3#{C:inactive})"
         }
     },
-    config = { extra = { Xmult = 6, min_lvl = 4 } },
+    config = { extra = { Xmult = 5, num_hands = 3} },
     pos = {
         x = 3,
         y = 42
     },
-    cost = 7,
+    cost = 10,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3461,11 +3463,11 @@ SMODS.Joker {
     atlas = 'IsaactroJokers',
 
     loc_vars = function(self, info_queue, card)
-        return {vars = { card.ability.extra.Xmult, card.ability.extra.min_lvl }}
+        return {vars = { card.ability.extra.Xmult, card.ability.extra.num_hands, G.GAME.round_resets.ante }}
     end,
 
     calculate = function(self, card, context)
-        if context.joker_main and all_hands_meet_level(card.ability.extra.min_lvl) then
+        if context.joker_main and n_hands_meet_level(card.ability.extra.num_hands, G.GAME.round_resets.ante) then
             return {
                 Xmult_mod = card.ability.extra.Xmult,
                 message = localize { type = 'variable', key = 'a_xmult', vars = {card.ability.extra.Xmult} }
@@ -3523,7 +3525,7 @@ SMODS.Joker {
 
 -- Sacred Orb (rare)
 SMODS.Joker {
-    -- All common jokers in shop are rerolled once
+    -- All common jokers in shop are rerolled once into uncommon jokers
     key = "sacredorb",
     loc_txt = {
         name = 'Sacred Orb',
@@ -3532,7 +3534,7 @@ SMODS.Joker {
             "{C:blue}Common Jokers{} in shop have",
             "a {C:green}#1# in #2#{} chance to",
             "be {C:attention}rerolled{} into a random",
-            "{C:green}Uncommon Joker{}"
+            "{C:green}Uncommon Joker{} "
         }
     },
     pos = {
@@ -3540,7 +3542,7 @@ SMODS.Joker {
         y = 69
     },
     config = { extra = { odds = 2 } },
-    cost = 6,
+    cost = 8,
     rarity = 3,
     blueprint_compat = false,
     eternal_compat = true,
@@ -3594,41 +3596,50 @@ SMODS.Joker {
 }
 
 -- Tester challenge to test jokers
--- SMODS.Challenge {
---     loc_txt = "Isaactro Tester",
---     key = "isaactro_tester",
---     rules = {
---         custom = {},
---         modifiers = {
---             {id = 'hands', value = 10},
---             {id = 'discards', value = 10},
---             {id = 'joker_slots', value = 10},
---             {id = 'dollars', value = 10000}
---         }
---     },
---     vouchers = {
---         {id = "v_overstock_norm"},
---         {id = "v_overstock_plus"},
---         {id = "v_paint_brush"},
---         {id = "v_palette"},
---         {id = "v_reroll_surplus"},
---         {id = "v_reroll_glut"},
---         {id = "v_tarot_merchant"},
---         {id = "v_tarot_tycoon"},
---         {id = "v_telescope"}
---     },
---     jokers = { 
---         {id = "j_itro_holylight"}, 
---         {id = "j_blueprint", eternal = true},
---         {id = "j_bootstraps"},
---         {id = "j_cavendish"},
---         {id = "j_oops"},
---         -- {id = "j_hanging_chad"},
---     },
---     consumeables = {
---         {id = "c_magician"},
---         {id = "c_fool"}
---     },
---     unlocked = true
--- }
+SMODS.Challenge {
+    loc_txt = "Isaactro Tester",
+    key = "isaactro_tester",
+    rules = {
+        custom = {},
+        modifiers = {
+            {id = 'hands', value = 10},
+            {id = 'discards', value = 10},
+            {id = 'joker_slots', value = 10},
+            {id = 'dollars', value = 10000}
+        }
+    },
+    vouchers = {
+        {id = "v_overstock_norm"},
+        {id = "v_overstock_plus"},
+        {id = "v_paint_brush"},
+        {id = "v_palette"},
+        {id = "v_reroll_surplus"},
+        {id = "v_reroll_glut"},
+        {id = "v_tarot_merchant"},
+        {id = "v_tarot_tycoon"},
+        {id = "v_telescope"}
+    },
+    jokers = { 
+        {id = "j_itro_brimstone"}, 
+        {id = "j_blueprint", eternal = true},
+        {id = "j_bootstraps"},
+        {id = "j_cavendish"},
+        {id = "j_oops"},
+        -- {id = "j_hanging_chad"},
+    },
+    consumeables = {
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+        {id = "c_death", edition = "negative"},
+    },
+    unlocked = true
+}
 
