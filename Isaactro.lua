@@ -1882,7 +1882,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'Technology',
         text = {
-            "If a {C:attention}Four of a Kind{} is played",
+            "If {C:attention}Four of a Kind{} is played",
             "with {C:attention}1 unscored card,",
             "convert it to the {C:attention}rank",
             "{C:attention}of the other cards"
@@ -1933,7 +1933,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'The Parasite',
         text = {
-            "If {C:attention}Discard{} contains ",
+            "If {C:red}Discard{} contains ",
             "only {C:attention}#1#{} card, gain",
             "{C:red}+#2#{} hand size for",
             "the round"
@@ -2039,9 +2039,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Dead Eye',
         text = {
-            "This {C:attention}Joker{} gains",
-            "{X:mult,C:white}X#1#{} Mult per",
-            "consecutive {C:attention}same{}",
+            "This Joker gains {X:mult,C:white}X#1#{} Mult",
+            "per consecutive {C:attention}same{}",
             "{C:attention}poker hand{} played",
             "{s:0.8}Last played #2#",
             "{C:inactive}(Currently {X:mult,C:white}X#3#{C:inactive} Mult)"
@@ -2143,7 +2142,7 @@ SMODS.Joker {
     loc_txt = {
         name = "Keeper's Sack",
         text = {
-            "This {C:attention}Joker{} gains",
+            "This Joker gains",
             "{C:mult}+#1#{} Mult for every",
             "{C:money}$#2#{} you spend in Shop",
             "{s:0.8}Excludes rerolls",
@@ -2583,7 +2582,7 @@ SMODS.Joker {
         text = {
             "This Joker gains {C:mult}+#1#{} Mult",
             "per hand played",
-            "containing {C:attention}#2# scoring cards{}",
+            "containing {C:attention}#2#{} scoring cards",
             "{C:inactive}(Currently {C:mult}+#3#{C:inactive} Mult)"
         }
     },
@@ -2786,7 +2785,7 @@ SMODS.Joker {
         text = {
             "This Joker gains {X:mult,C:white}X#1#{} Mult",
             "when {C:planet}Planet{} card for",
-            "{C:attention}most played hand{} is used",
+            "{C:attention}Most Played Hand{} is used",
             "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult)"
         }
     },
@@ -3394,12 +3393,12 @@ SMODS.Joker {
             "card is {V:1}Hearts"
         }
     },
-    config = { extra = { Xmult = 3 } },
+    config = { extra = { Xmult = 4 } },
     pos = {
         x = 9,
         y = 29
     },
-    cost = 10,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
