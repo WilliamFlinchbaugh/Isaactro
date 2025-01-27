@@ -516,7 +516,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'Wooden Nickel',
         text = {
-            "Each {C:red}hand played{} has a",
+            "Each {C:attention}hand played{} has a",
             "{C:green}#1# in #2#{} chance to",
             "give {C:money}$#1#{}"
         }
@@ -593,8 +593,7 @@ SMODS.Joker {
         name = 'Experimental Treatment',
         text = {
             "Random {C:red}Multiplier{} from",
-            "{X:mult,C:white}X#1#{} to {X:mult,C:white}X#2#{}",
-            "{s:0.8}Resets after each hand played"
+            "{X:mult,C:white}X#1#{} to {X:mult,C:white}X#2#{}"
         }
     },
     config = { extra = { Xmult_min = 0.8, Xmult_max = 1.7 } },
@@ -688,7 +687,7 @@ SMODS.Joker {
         name = 'Booster Pack',
         text = {
             "After {C:attention}#1#{} rounds, sell this card",
-            "to gain {C:attention}#2#{} Negative {C:tarot}Tarot{} cards",
+            "to gain {C:attention}#2# {C:dark_edition}Negative {C:tarot}Tarot{} cards",
             "{C:inactive}(Currently {C:attention}#3#{C:inactive}/#1#)"
         }
     },
@@ -985,7 +984,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'Epiphora',
         text = {
-            "This joker gains {C:chips}+#1#{} Chips",
+            "This Joker gains {C:chips}+#1#{} Chips",
             "per {C:attention}consecutive{} round",
             "won playing only {C:attention}one hand{}",
             "{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips){}"
@@ -1224,9 +1223,9 @@ SMODS.Joker {
     end
 }
 
--- Head of the Keeper (common)
+-- Head of the Keeper (uncommon)
 SMODS.Joker {
-    -- 1$ for each hand played at the end of the round
+    -- Earn $3 for every 2 hands played at the end of the round
     key = "headofthekeeper",
     loc_txt = {
         name = 'Head of the Keeper',
@@ -1240,8 +1239,8 @@ SMODS.Joker {
         x = 5,
         y = 50
     },
-    cost = 5,
-    rarity = 1,
+    cost = 6,
+    rarity = 2,
     blueprint_compat = false,
     eternal_compat = true,
     unlocked = true,
@@ -1370,7 +1369,7 @@ SMODS.Joker {
     -- When sold (after 2 rounds), destroys up to two other jokers (to the right of this joker) and replaces them with random eternal uncommon or rare jokers
     key = "sacrificialaltar",
     loc_txt = {
-        name = 'Sacrifical Altar',
+        name = 'Sacrificial Altar',
         text = {
             "After {C:attention}#1#{} rounds, sell this card",
             "to destroy up to {C:attention}#2#{} Jokers",
@@ -1627,8 +1626,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Member Card',
         text = {
-            "After each {C:attention}Reroll{}, add a",
-            "{C:attention}Random Card{} to the shop",
+            "After each {C:attention}Reroll{}, add an",
+            "extra {C:attention}Random Card{} to the shop",
             "with the price {C:red}Doubled{}",
         }
     },
@@ -1737,7 +1736,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'Starter Deck',
         text = {
-            "When {C:attention}Planet Card{} is purchased,",
+            "When {C:attention}Planet{} Card is purchased,",
             "destroy it and gain a random",
             "{C:tarot}Tarot{} Card",
             "{C:attention}+#1#{} Consumable Slots"
@@ -2390,7 +2389,7 @@ SMODS.Joker {
         x = 5,
         y = 42
     },
-    cost = 6,
+    cost = 8,
     rarity = 3,
     blueprint_compat = false,
     eternal_compat = true,
@@ -2423,7 +2422,7 @@ SMODS.Joker {
         x = 6,
         y = 42
     },
-    cost = 6,
+    cost = 8,
     rarity = 3,
     blueprint_compat = false,
     eternal_compat = true,
@@ -2456,7 +2455,7 @@ SMODS.Joker {
         x = 7,
         y = 42
     },
-    cost = 6,
+    cost = 8,
     rarity = 3,
     blueprint_compat = false,
     eternal_compat = true,
@@ -2511,7 +2510,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { odds = 2 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2552,7 +2551,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { chip_mod = 8, cards = 5, chips = 0 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2593,7 +2592,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { mult_mod = 6, cards = 5, mult = 0 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2636,7 +2635,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { mult_mod = 1, increment = 2, mult = 0 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2676,7 +2675,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { money = 1, held_increment = 7, cap = 10 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = false,
     eternal_compat = true,
@@ -2709,7 +2708,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult_mod = 1, jokers_over = 5 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2753,7 +2752,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult_mod = 1 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2796,7 +2795,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult_mod = 0.2, xmult = 1 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2843,7 +2842,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult_mod = 0.2, xmult = 1 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2891,7 +2890,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult_mod = 0.05, xmult = 1 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2947,7 +2946,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult = 3 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -2995,7 +2994,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { mult_mod = 2, mult = 0 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3037,7 +3036,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { mult_mod = 1, mult = 0 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3087,7 +3086,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { mult_mod = 2, mult = 0 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3137,7 +3136,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult_mod = 0.2, ratio = 4, xmult = 1 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3184,7 +3183,7 @@ SMODS.Joker {
         y = 64
     },
     config = { extra = { xmult = 4 } },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = true,
     eternal_compat = true,
@@ -3241,7 +3240,7 @@ SMODS.Joker {
         x = 1,
         y = 6
     },
-    cost = 7,
+    cost = 9,
     rarity = 3,
     blueprint_compat = false,
     eternal_compat = true,
@@ -3292,7 +3291,7 @@ SMODS.Joker {
         x = 5,
         y = 25
     },
-    cost = 7,
+    cost = 8,
     rarity = 3,
     blueprint_compat = false,
     eternal_compat = true,
