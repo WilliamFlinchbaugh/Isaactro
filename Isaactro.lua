@@ -778,28 +778,23 @@ SMODS.Joker {
         if context.cardarea == G.hand and context.other_card and context.individual and G.GAME.current_round.hands_played == 0 then
             card.ability.extra.used = true
             if #context.full_hand == 1 then
-                if context.blueprint then
-                    G.E_MANAGER:add_event(Event({
-                        trigger = 'before',
-                        delay = 0.0,
-                        func = (function()
+                context.other_card.ability.perma_bonus = context.other_card.ability.perma_bonus + card.ability.extra.chip_mod
+                -- card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = "Blessed!", colour = G.C.BLUE})
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'before',
+                    delay = 0.0,
+                    func = (function()
+                        if context.blueprint then
                             context.blueprint_card:juice_up(0.3, 0.4)
-                            context.other_card.ability.perma_bonus = context.other_card.ability.perma_bonus + card.ability.extra.chip_mod
-                            return true
-                        end
-                    )}))
-                else
-                    G.E_MANAGER:add_event(Event({
-                        trigger = 'before',
-                        delay = 0.0,
-                        func = (function()
+                        else
                             card:juice_up(0.3, 0.4)
-                            context.other_card.ability.perma_bonus = context.other_card.ability.perma_bonus + card.ability.extra.chip_mod
-                            return true
                         end
-                    )}))
-                end
-                card_eval_status_text(context.other_card, 'extra', nil, nil, nil, {message = "Blessed!", colour = G.C.BLUE})
+                        return true
+                end)}))
+                return {
+                    message = "Blessed!",
+                    colour = G.C.BLUE
+                }
             end
         end
     end
@@ -3618,7 +3613,7 @@ SMODS.Challenge {
         {id = "v_telescope"}
     },
     jokers = { 
-        {id = "j_itro_brimstone"}, 
+        {id = "j_itro_bible"}, 
         {id = "j_blueprint", eternal = true},
         {id = "j_bootstraps"},
         {id = "j_cavendish"},
@@ -3626,17 +3621,6 @@ SMODS.Challenge {
         -- {id = "j_hanging_chad"},
     },
     consumeables = {
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
-        {id = "c_death", edition = "negative"},
     },
     unlocked = true
 }
